@@ -67,8 +67,8 @@ void Error_Handler(void);
 #define RUN_LED_GPIO_Port GPIOB
 #define USART6_DE_Pin GPIO_PIN_8
 #define USART6_DE_GPIO_Port GPIOC
-#define USARTI_DE_Pin GPIO_PIN_11
-#define USARTI_DE_GPIO_Port GPIOA
+#define USART1_DE_Pin GPIO_PIN_11
+#define USART1_DE_GPIO_Port GPIOA
 #define USART5_DE_Pin GPIO_PIN_1
 #define USART5_DE_GPIO_Port GPIOD
 

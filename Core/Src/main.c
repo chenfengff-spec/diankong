@@ -23,7 +23,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+// [修改开始]：新增状态机头文件和字符串处理头文件
+#include "state_machine.h" // 引入状态机模块的头文件
+#include <string.h>        // 用于内存操作函数，如memset
+// [修改结束]
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,13 +97,19 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  // [修改开始]：在所有硬件外设初始化完成后，初始化并启动状态机
+  StateMachine_Init(); // 初始化状态机及其内部变量，并设置DE引脚为接收模式
+  // [修改结束]
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // [修改开始]：在主循环中周期性地调用状态机运行函数
+    StateMachine_Run(); // 执行状态机逻辑，根据当前状态进行处理和状态转换
+    // 可以在这里添加一些低优先级、非实时的后台任务，或者睡眠/低功耗模式
+    // [修改结束]
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -168,6 +177,10 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+    // [修改开始]：错误发生时，通过 LED 闪烁进行指示
+    Toggle_RUN_LED(); // 调用状态机中定义的 LED 切换函数
+    HAL_Delay(100);   // 短暂延迟，实现快闪效果
+    // [修改结束]
   }
   /* USER CODE END Error_Handler_Debug */
 }
