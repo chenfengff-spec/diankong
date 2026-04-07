@@ -1,0 +1,26 @@
+--cpu=Cortex-M4.fp
+"diankong\startup_stm32f427xx.o"
+"diankong\main.o"
+"diankong\gpio.o"
+"diankong\usart.o"
+"diankong\stm32f4xx_it.o"
+"diankong\stm32f4xx_hal_msp.o"
+"diankong\stm32f4xx_hal_uart.o"
+"diankong\stm32f4xx_hal_rcc.o"
+"diankong\stm32f4xx_hal_rcc_ex.o"
+"diankong\stm32f4xx_hal_flash.o"
+"diankong\stm32f4xx_hal_flash_ex.o"
+"diankong\stm32f4xx_hal_flash_ramfunc.o"
+"diankong\stm32f4xx_hal_gpio.o"
+"diankong\stm32f4xx_hal_dma_ex.o"
+"diankong\stm32f4xx_hal_dma.o"
+"diankong\stm32f4xx_hal_pwr.o"
+"diankong\stm32f4xx_hal_pwr_ex.o"
+"diankong\stm32f4xx_hal_cortex.o"
+"diankong\stm32f4xx_hal.o"
+"diankong\stm32f4xx_hal_exti.o"
+"diankong\system_stm32f4xx.o"
+--strict --scatter "diankong\diankong.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "diankong.map" -o diankong\diankong.axf
