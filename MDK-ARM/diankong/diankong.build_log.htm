@@ -28,91 +28,17 @@ Project File Date:  04/07/2026
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'diankong'
 compiling state_machine.c...
-../Core/Inc/state_machine.h(106): warning:  #1-D: last line of file ends without a newline
-  #endif // STATE_MACHINE_H
-..\Core\Src\state_machine.c(69): error:  #20: identifier "RS485_1_DE_GPIO_Port" is undefined
-  void RS485_1_DE_Receive(void) { HAL_GPIO_WritePin(RS485_1_DE_GPIO_Port, RS485_1_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(69): error:  #20: identifier "RS485_1_DE_Pin" is undefined
-  void RS485_1_DE_Receive(void) { HAL_GPIO_WritePin(RS485_1_DE_GPIO_Port, RS485_1_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(70): error:  #20: identifier "RS485_1_DE_GPIO_Port" is undefined
-  void RS485_1_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_1_DE_GPIO_Port, RS485_1_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(70): error:  #20: identifier "RS485_1_DE_Pin" is undefined
-  void RS485_1_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_1_DE_GPIO_Port, RS485_1_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(71): error:  #20: identifier "RS485_2_DE_GPIO_Port" is undefined
-  void RS485_2_DE_Receive(void) { HAL_GPIO_WritePin(RS485_2_DE_GPIO_Port, RS485_2_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(71): error:  #20: identifier "RS485_2_DE_Pin" is undefined
-  void RS485_2_DE_Receive(void) { HAL_GPIO_WritePin(RS485_2_DE_GPIO_Port, RS485_2_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(72): error:  #20: identifier "RS485_2_DE_GPIO_Port" is undefined
-  void RS485_2_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_2_DE_GPIO_Port, RS485_2_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(72): error:  #20: identifier "RS485_2_DE_Pin" is undefined
-  void RS485_2_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_2_DE_GPIO_Port, RS485_2_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(73): error:  #20: identifier "RS485_3_DE_GPIO_Port" is undefined
-  void RS485_3_DE_Receive(void) { HAL_GPIO_WritePin(RS485_3_DE_GPIO_Port, RS485_3_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(73): error:  #20: identifier "RS485_3_DE_Pin" is undefined
-  void RS485_3_DE_Receive(void) { HAL_GPIO_WritePin(RS485_3_DE_GPIO_Port, RS485_3_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(74): error:  #20: identifier "RS485_3_DE_GPIO_Port" is undefined
-  void RS485_3_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_3_DE_GPIO_Port, RS485_3_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(74): error:  #20: identifier "RS485_3_DE_Pin" is undefined
-  void RS485_3_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_3_DE_GPIO_Port, RS485_3_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(75): error:  #20: identifier "RS485_4_DE_GPIO_Port" is undefined
-  void RS485_4_DE_Receive(void) { HAL_GPIO_WritePin(RS485_4_DE_GPIO_Port, RS485_4_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(75): error:  #20: identifier "RS485_4_DE_Pin" is undefined
-  void RS485_4_DE_Receive(void) { HAL_GPIO_WritePin(RS485_4_DE_GPIO_Port, RS485_4_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(76): error:  #20: identifier "RS485_4_DE_GPIO_Port" is undefined
-  void RS485_4_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_4_DE_GPIO_Port, RS485_4_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(76): error:  #20: identifier "RS485_4_DE_Pin" is undefined
-  void RS485_4_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_4_DE_GPIO_Port, RS485_4_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(77): error:  #20: identifier "RS485_6_DE_GPIO_Port" is undefined
-  void RS485_6_DE_Receive(void) { HAL_GPIO_WritePin(RS485_6_DE_GPIO_Port, RS485_6_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(77): error:  #20: identifier "RS485_6_DE_Pin" is undefined
-  void RS485_6_DE_Receive(void) { HAL_GPIO_WritePin(RS485_6_DE_GPIO_Port, RS485_6_DE_Pin, GPIO_PIN_RESET); }
-..\Core\Src\state_machine.c(78): error:  #20: identifier "RS485_6_DE_GPIO_Port" is undefined
-  void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_6_DE_GPIO_Port, RS485_6_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(78): error:  #20: identifier "RS485_6_DE_Pin" is undefined
-  void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_6_DE_GPIO_Port, RS485_6_DE_Pin, GPIO_PIN_SET); }
-..\Core\Src\state_machine.c(133): error:  #20: identifier "DEEP_WATER_SWITCH_GPIO_Port" is undefined
-      return HAL_GPIO_ReadPin(DEEP_WATER_SWITCH_GPIO_Port, DEEP_WATER_SWITCH_Pin) == GPIO_PIN_SET; // 假设高电平为触发
-..\Core\Src\state_machine.c(133): error:  #20: identifier "DEEP_WATER_SWITCH_Pin" is undefined
-      return HAL_GPIO_ReadPin(DEEP_WATER_SWITCH_GPIO_Port, DEEP_WATER_SWITCH_Pin) == GPIO_PIN_SET; // 假设高电平为触发
-..\Core\Src\state_machine.c(146): warning:  #223-D: function "memset" declared implicitly
+..\Core\Src\state_machine.c(207): warning:  #223-D: function "memset" declared implicitly
       memset(&g_sampling_log, 0, sizeof(SamplingLog_t));
-..\Core\Src\state_machine.c(179): warning:  #1-D: last line of file ends without a newline
-          system_self_check_
-..\Core\Src\state_machine.c(179): error:  #20: identifier "system_self_check_" is undefined
-          system_self_check_
-..\Core\Src\state_machine.c(179): error: At end of source:  #65: expected a ";"
-..\Core\Src\state_machine.c(179): error: At end of source:  #67: expected a "}"
-..\Core\Src\state_machine.c(179): error: At end of source:  #67: expected a "}"
-..\Core\Src\state_machine.c(34): warning:  #177-D: variable "pump2_run_start_tick"  was declared but never referenced
-  static uint32_t pump2_run_start_tick = 0;
+..\Core\Src\state_machine.c(383): warning:  #223-D: function "memset" declared implicitly
+      memset(&g_sampling_log, 0, sizeof(SamplingLog_t));
 ..\Core\Src\state_machine.c(35): warning:  #177-D: variable "pump1_run_start_tick"  was declared but never referenced
   static uint32_t pump1_run_start_tick = 0;
-..\Core\Src\state_machine.c(141): warning:  #177-D: function "State_Handle_Initial"  was declared but never referenced
-  static void State_Handle_Initial(void) {
-..\Core\Src\state_machine.c(154): warning:  #177-D: function "State_Handle_SelfCheck"  was declared but never referenced
-  static void State_Handle_SelfCheck(void) {
-..\Core\Src\state_machine.c(44): warning:  #177-D: function "State_Handle_WaitingForTriggerModeSelection"  was declared but never referenced
-  static void State_Handle_WaitingForTriggerModeSelection(void);
-..\Core\Src\state_machine.c(45): warning:  #177-D: function "State_Handle_WaitingForTriggerCondition"  was declared but never referenced
-  static void State_Handle_WaitingForTriggerCondition(void);
-..\Core\Src\state_machine.c(46): warning:  #177-D: function "State_Handle_Pump2RunningWaterCollection"  was declared but never referenced
-  static void State_Handle_Pump2RunningWaterCollection(void);
-..\Core\Src\state_machine.c(47): warning:  #177-D: function "State_Handle_Pump2StoppedCollectionComplete"  was declared but never referenced
-  static void State_Handle_Pump2StoppedCollectionComplete(void);
-..\Core\Src\state_machine.c(48): warning:  #177-D: function "State_Handle_Pump1RunningCleaning"  was declared but never referenced
-  static void State_Handle_Pump1RunningCleaning(void);
-..\Core\Src\state_machine.c(49): warning:  #177-D: function "State_Handle_SamplingComplete"  was declared but never referenced
-  static void State_Handle_SamplingComplete(void);
-..\Core\Src\state_machine.c(50): warning:  #177-D: function "State_Handle_Error"  was declared but never referenced
-  static void State_Handle_Error(void);
-..\Core\Src\state_machine.c: 14 warnings, 26 errors
-compiling usart.c...
-../Core/Src/usart.c(513): error:  #20: identifier "FILE" is undefined
-  int fputc(int ch, FILE *f)
-../Core/Src/usart.c(524): error:  #20: identifier "FILE" is undefined
-  int fgetc(FILE *f)
-../Core/Src/usart.c: 0 warnings, 2 errors
-"diankong\diankong.axf" - 28 Error(s), 14 Warning(s).
+..\Core\Src\state_machine.c: 3 warnings, 0 errors
+linking...
+Program Size: Code=7270 RO-data=486 RW-data=44 ZI-data=25124  
+FromELF: creating hex file...
+"diankong\diankong.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -135,8 +61,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
-Target not created.
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

@@ -21,6 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include "stdio.h"
 uint8_t aRx1Buffer;
 
 /* USER CODE END 0 */

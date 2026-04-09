@@ -54,8 +54,23 @@ static void State_Handle_Error(void);
 // 辅助函数实现 (可根据需要拆分到各自的驱动文件)
 // ============================================================================
 
+/**
+  * @brief  Turn on the RUN_LED.
+  * @param  None
+  * @retval None
+  */
 void TurnOn_RUN_LED(void)  { HAL_GPIO_WritePin(RUN_LED_GPIO_Port, RUN_LED_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Turn off the RUN_LED.
+  * @param  None
+  * @retval None
+  */
 void TurnOff_RUN_LED(void) { HAL_GPIO_WritePin(RUN_LED_GPIO_Port, RUN_LED_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Toggle the state of the RUN_LED.
+  * @param  None
+  * @retval None
+  */
 void Toggle_RUN_LED(void)  { HAL_GPIO_TogglePin(RUN_LED_GPIO_Port, RUN_LED_Pin); }
 
 void Log_Event(const char* event_message) {
@@ -66,16 +81,67 @@ void Log_Event(const char* event_message) {
 }
 
 // RS485 DE 引脚控制实现 (假定宏已在 gpio.h 或 main.h 中定义)
-void RS485_1_DE_Receive(void) { HAL_GPIO_WritePin(RS485_1_DE_GPIO_Port, RS485_1_DE_Pin, GPIO_PIN_RESET); }
-void RS485_1_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_1_DE_GPIO_Port, RS485_1_DE_Pin, GPIO_PIN_SET); }
-void RS485_2_DE_Receive(void) { HAL_GPIO_WritePin(RS485_2_DE_GPIO_Port, RS485_2_DE_Pin, GPIO_PIN_RESET); }
-void RS485_2_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_2_DE_GPIO_Port, RS485_2_DE_Pin, GPIO_PIN_SET); }
-void RS485_3_DE_Receive(void) { HAL_GPIO_WritePin(RS485_3_DE_GPIO_Port, RS485_3_DE_Pin, GPIO_PIN_RESET); }
-void RS485_3_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_3_DE_GPIO_Port, RS485_3_DE_Pin, GPIO_PIN_SET); }
-void RS485_4_DE_Receive(void) { HAL_GPIO_WritePin(RS485_4_DE_GPIO_Port, RS485_4_DE_Pin, GPIO_PIN_RESET); }
-void RS485_4_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_4_DE_GPIO_Port, RS485_4_DE_Pin, GPIO_PIN_SET); }
-void RS485_6_DE_Receive(void) { HAL_GPIO_WritePin(RS485_6_DE_GPIO_Port, RS485_6_DE_Pin, GPIO_PIN_RESET); }
-void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(RS485_6_DE_GPIO_Port, RS485_6_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_1 DE pin to receive mode. (Analog Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_1_DE_Receive(void) { HAL_GPIO_WritePin(USART1_DE_GPIO_Port, USART1_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_1 DE pin to transmit mode. (Analog Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_1_DE_Transmit(void) { HAL_GPIO_WritePin(USART1_DE_GPIO_Port, USART1_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_2 DE pin to receive mode. (Pump 1)
+  * @param  None
+  * @retval None
+  */
+void RS485_2_DE_Receive(void) { HAL_GPIO_WritePin(USART2_DE_GPIO_Port, USART2_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_2 DE pin to transmit mode. (Pump 1)
+  * @param  None
+  * @retval None
+  */
+void RS485_2_DE_Transmit(void) { HAL_GPIO_WritePin(USART2_DE_GPIO_Port, USART2_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_3 DE pin to receive mode. (Pump 2)
+  * @param  None
+  * @retval None
+  */
+void RS485_3_DE_Receive(void) { HAL_GPIO_WritePin(USART3_DE_GPIO_Port, USART3_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_3 DE pin to transmit mode. (Pump 2)
+  * @param  None
+  * @retval None
+  */
+void RS485_3_DE_Transmit(void) { HAL_GPIO_WritePin(USART3_DE_GPIO_Port, USART3_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_4 DE pin to receive mode. (Pulse Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_4_DE_Receive(void) { HAL_GPIO_WritePin(USART4_DE_GPIO_Port, USART4_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_4 DE pin to transmit mode. (Pulse Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_4_DE_Transmit(void) { HAL_GPIO_WritePin(USART4_DE_GPIO_Port, USART4_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_6 DE pin to receive mode. (Upper Computer)
+  * @param  None
+  * @retval None
+  */
+void RS485_6_DE_Receive(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_6 DE pin to transmit mode. (Upper Computer)
+  * @param  None
+  * @retval None
+  */
+void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_DE_Pin, GPIO_PIN_SET); }
+
 
 
 // 设备通信检查占位符实现
@@ -128,11 +194,6 @@ uint32_t Get_Flow_Pulse_Count(void) {
     return current_pulse_count; // 示例，实际应从硬件读取
 }
 
-// 其他输入
-bool Read_DeepWater_Switch(void) {
-    return HAL_GPIO_ReadPin(DEEP_WATER_SWITCH_GPIO_Port, DEEP_WATER_SWITCH_Pin) == GPIO_PIN_SET; // 假设高电平为触发
-}
-
 
 // ============================================================================
 // 状态处理函数实现 (静态函数，仅在此文件内可见)
@@ -176,4 +237,193 @@ static void State_Handle_SelfCheck(void) {
     }
 
     if (pump1_comm_ok && pump2_comm_ok && pulse_collector_comm_ok && analog_collector_comm_ok) {
-        system_self_check_
+        system_self_check_passed = true;
+        Log_Event("System self-check PASSED.");
+        currentSystemState = STATE_WAITING_FOR_TRIGGER_MODE_SELECTION;
+        self_check_start_tick = 0;
+        TurnOff_RUN_LED();
+    }
+    else if ((HAL_GetTick() - self_check_start_tick > SYSTEM_SELF_CHECK_TIMEOUT_MS) && !system_self_check_passed) {
+        Log_Event("System self-check FAILED or TIMEOUT.");
+        currentSystemState = STATE_ERROR;
+        self_check_start_tick = 0;
+    }
+}
+
+static void State_Handle_WaitingForTriggerModeSelection(void) {
+    static bool mode_selected = false;
+    if (!mode_selected) {
+        Log_Event("Waiting for trigger mode selection...");
+        // 实际应从上位机获取
+        selectedTriggerMode = TRIGGER_MODE_DELAY; // 示例：暂时硬编码
+        g_sampling_log.trigger_mode_at_start = selectedTriggerMode;
+        mode_selected = true;
+        Log_Event("Trigger mode selected.");
+    }
+
+    if (selectedTriggerMode != TRIGGER_MODE_NONE) {
+        currentSystemState = STATE_WAITING_FOR_TRIGGER_CONDITION;
+        mode_selected = false;
+    }
+}
+
+static void State_Handle_WaitingForTriggerCondition(void) {
+    Log_Event("Waiting for trigger condition...");
+    bool trigger_met = false;
+    float current_depth = 0.0f;
+    uint32_t current_delay_ms = 0;
+
+    switch (selectedTriggerMode) {
+        case TRIGGER_MODE_DELAY:
+            if (HAL_GetTick() > 5000) {
+                trigger_met = true;
+                Log_Event("Trigger: Delay condition met.");
+            }
+            break;
+        case TRIGGER_MODE_DEPTH:
+            current_depth = Get_Depth_Value();
+            if (current_depth >= 50.0f) {
+                trigger_met = true;
+                Log_Event("Trigger: Depth condition met.");
+            }
+            break;
+        case TRIGGER_MODE_DEPTH_OR_DELAY:
+            current_depth = Get_Depth_Value();
+            current_delay_ms = HAL_GetTick();
+            if (current_depth >= 50.0f || current_delay_ms >= 10000) {
+                trigger_met = true;
+                Log_Event("Trigger: Depth or Delay condition met.");
+            }
+            break;
+        case TRIGGER_MODE_SERIAL_COMMAND:
+            if (HAL_GetTick() > 8000) { // 模拟等待串口指令
+                trigger_met = true;
+                Log_Event("Trigger: Simulated serial command received.");
+            }
+            break;
+        case TRIGGER_MODE_NONE:
+            Log_Event("Error: No trigger mode set.");
+            currentSystemState = STATE_ERROR;
+            break;
+    }
+
+    if (trigger_met) {
+        g_sampling_log.sampling_start_time = HAL_GetTick();
+        Log_Event("Trigger condition met. Starting water sampling.");
+        currentSystemState = STATE_PUMP2_RUNNING_WATER_COLLECTION;
+    }
+}
+
+static void State_Handle_Pump2RunningWaterCollection(void) {
+    static bool pump2_started = false;
+    if (!pump2_started) {
+        Pump2_Start(PUMP2_RPM_DEFAULT);
+        pump2_run_start_tick = HAL_GetTick();
+        current_pulse_count = 0;
+        Log_Event("Pump2 started for water collection.");
+        pump2_started = true;
+    }
+
+    current_pulse_count = Get_Flow_Pulse_Count();
+
+    if ((HAL_GetTick() - pump2_run_start_tick >= PUMP2_MAX_RUN_TIME_MS) ||
+        (current_pulse_count >= REQUIRED_PULSE_FOR_10L)) {
+        Log_Event("Pump2 stop condition met.");
+        currentSystemState = STATE_PUMP2_STOPPED_COLLECTION_COMPLETE;
+        pump2_started = false;
+    }
+}
+
+static void State_Handle_Pump2StoppedCollectionComplete(void) {
+    Pump2_Stop();
+    g_sampling_log.pump2_stop_time = HAL_GetTick();
+    Log_Event("Pump2 stopped. Water collection complete.");
+    currentSystemState = STATE_PUMP1_RUNNING_CLEANING;
+}
+
+static void State_Handle_Pump1RunningCleaning(void) {
+    static bool pump1_started = false;
+    if (!pump1_started) {
+        Pump1_Start(PUMP1_RPM_DEFAULT);
+        g_sampling_log.pump1_start_time = HAL_GetTick();
+        Log_Event("Pump1 started for cleaning.");
+        pump1_started = true;
+    }
+
+    if (HAL_GetTick() - g_sampling_log.pump1_start_time >= PUMP1_RUN_TIME_MS) {
+        Pump1_Stop();
+        g_sampling_log.pump1_stop_time = HAL_GetTick();
+        Log_Event("Pump1 stopped. Cleaning complete.");
+        currentSystemState = STATE_SAMPLING_COMPLETE;
+        pump1_started = false;
+    }
+}
+
+static void State_Handle_SamplingComplete(void) {
+    Log_Event("Sampling process completed successfully!");
+    TurnOn_RUN_LED();
+    // 保持在此状态
+}
+
+static void State_Handle_Error(void) {
+    Log_Event("ERROR STATE. System halted or in recovery mode.");
+    Toggle_RUN_LED();
+    HAL_Delay(500);
+    // 保持在此状态
+}
+
+
+// ============================================================================
+// 状态机初始化与运行函数
+// ============================================================================
+
+void StateMachine_Init(void) {
+    currentSystemState = STATE_INITIAL;
+    selectedTriggerMode = TRIGGER_MODE_NONE;
+    memset(&g_sampling_log, 0, sizeof(SamplingLog_t));
+    system_self_check_passed = false;
+    // 初始化所有RS485的DE引脚为接收模式
+    RS485_1_DE_Receive();
+    RS485_2_DE_Receive();
+    RS485_3_DE_Receive();
+    RS485_4_DE_Receive();
+    RS485_6_DE_Receive();
+    Log_Event("StateMachine initialized.");
+}
+
+
+void StateMachine_Run(void) {
+    switch (currentSystemState) {
+        case STATE_INITIAL:
+            State_Handle_Initial();
+            break;
+        case STATE_SELF_CHECK:
+            State_Handle_SelfCheck();
+            break;
+        case STATE_WAITING_FOR_TRIGGER_MODE_SELECTION:
+            State_Handle_WaitingForTriggerModeSelection();
+            break;
+        case STATE_WAITING_FOR_TRIGGER_CONDITION:
+            State_Handle_WaitingForTriggerCondition();
+            break;
+        case STATE_PUMP2_RUNNING_WATER_COLLECTION:
+            State_Handle_Pump2RunningWaterCollection();
+            break;
+        case STATE_PUMP2_STOPPED_COLLECTION_COMPLETE:
+            State_Handle_Pump2StoppedCollectionComplete();
+            break;
+        case STATE_PUMP1_RUNNING_CLEANING:
+            State_Handle_Pump1RunningCleaning();
+            break;
+        case STATE_SAMPLING_COMPLETE:
+            State_Handle_SamplingComplete();
+            break;
+        case STATE_ERROR:
+            State_Handle_Error();
+            break;
+        default:
+            Log_Event("Unknown state encountered. Transitioning to ERROR state.");
+            currentSystemState = STATE_ERROR;
+            break;
+    }
+}

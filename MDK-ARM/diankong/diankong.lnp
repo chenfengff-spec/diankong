@@ -1,5 +1,6 @@
 --cpu=Cortex-M4.fp
 "diankong\startup_stm32f427xx.o"
+"diankong\state_machine.o"
 "diankong\main.o"
 "diankong\gpio.o"
 "diankong\usart.o"
