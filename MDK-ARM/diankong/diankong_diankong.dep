@@ -1,7 +1,7 @@
 Dependencies for Project 'diankong', Target 'diankong': (DO NOT MODIFY !)
 F (startup_stm32f427xx.s)(0x69D47319)(--cpu Cortex-M4.fp -g --apcs=interwork -I.\RTE\_diankong-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include--pd "__UVISION_VERSION SETA 527" --pd "_RTE_ SETA 1" --pd "STM32F427xx SETA 1"--list startup_stm32f427xx.lst --xref -o diankong\startup_stm32f427xx.o --depend diankong\startup_stm32f427xx.d)
-F (..\Core\Src\state_machine.c)(0x69D49832)(--c99 -c --cpu Cortex-M4.fp -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_diankong-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx-o diankong\state_machine.o --omf_browse diankong\state_machine.crf --depend diankong\state_machine.d)
-I (../Core/Inc/state_machine.h)(0x69D4949B)
+F (..\Core\Src\state_machine.c)(0x69D742E7)(--c99 -c --cpu Cortex-M4.fp -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_diankong-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx-o diankong\state_machine.o --omf_browse diankong\state_machine.crf --depend diankong\state_machine.d)
+I (../Core/Inc/state_machine.h)(0x69D733C1)
 I (../Core/Inc/main.h)(0x69D4925F)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x69C63572)
 I (../Core/Inc/stm32f4xx_hal_conf.h)(0x69D464E9)
@@ -32,9 +32,10 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h)(0x69C63572)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x69C63572)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x69C63572)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x599ECD2E)
+I (../Core/Inc/modbus_rtu.h)(0x69D7426F)
 I (../Core/Inc/usart.h)(0x69C63576)
 I (../Core/Inc/gpio.h)(0x69C63576)
-F (..\Core\Inc\state_machine.h)(0x69D4949B)()
+F (..\Core\Inc\state_machine.h)(0x69D733C1)()
 F (../Core/Src/main.c)(0x69D47318)(--c99 -c --cpu Cortex-M4.fp -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_diankong-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx-o diankong\main.o --omf_browse diankong\main.crf --depend diankong\main.d)
 I (../Core/Inc/main.h)(0x69D4925F)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x69C63572)
@@ -67,8 +68,9 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x69C63572)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x69C63572)
 I (../Core/Inc/usart.h)(0x69C63576)
 I (../Core/Inc/gpio.h)(0x69C63576)
-I (../Core/Inc/state_machine.h)(0x69D4949B)
+I (../Core/Inc/state_machine.h)(0x69D733C1)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x599ECD2E)
+I (../Core/Inc/modbus_rtu.h)(0x69D7426F)
 I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x599ECD2C)
 F (../Core/Src/gpio.c)(0x69D47317)(--c99 -c --cpu Cortex-M4.fp -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_diankong-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx-o diankong\gpio.o --omf_browse diankong\gpio.crf --depend diankong\gpio.d)
 I (../Core/Inc/gpio.h)(0x69C63576)

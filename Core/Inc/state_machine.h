@@ -3,6 +3,7 @@
 
 #include "main.h" // 包含 main.h 以获取HAL库相关定义和GPIO宏
 #include <stdbool.h> // 用于 bool 类型
+#include "modbus_rtu.h"
 
 // ============================================================================
 // 状态定义

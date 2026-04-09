@@ -28,17 +28,25 @@ Project File Date:  04/07/2026
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'diankong'
 compiling state_machine.c...
-..\Core\Src\state_machine.c(207): warning:  #223-D: function "memset" declared implicitly
+../Core/Inc/modbus_rtu.h(86): warning:  #1-D: last line of file ends without a newline
+  #endif // MODBUS_RTU_H
+..\Core\Src\state_machine.c(232): warning:  #223-D: function "memset" declared implicitly
       memset(&g_sampling_log, 0, sizeof(SamplingLog_t));
-..\Core\Src\state_machine.c(383): warning:  #223-D: function "memset" declared implicitly
+..\Core\Src\state_machine.c(408): warning:  #223-D: function "memset" declared implicitly
       memset(&g_sampling_log, 0, sizeof(SamplingLog_t));
-..\Core\Src\state_machine.c(35): warning:  #177-D: variable "pump1_run_start_tick"  was declared but never referenced
+..\Core\Src\state_machine.c(36): warning:  #177-D: variable "pump1_run_start_tick"  was declared but never referenced
   static uint32_t pump1_run_start_tick = 0;
-..\Core\Src\state_machine.c: 3 warnings, 0 errors
+..\Core\Src\state_machine.c: 4 warnings, 0 errors
+compiling main.c...
+../Core/Inc/modbus_rtu.h(86): warning:  #1-D: last line of file ends without a newline
+  #endif // MODBUS_RTU_H
+../Core/Src/main.c: 1 warning, 0 errors
 linking...
-Program Size: Code=7270 RO-data=486 RW-data=44 ZI-data=25124  
-FromELF: creating hex file...
-"diankong\diankong.axf" - 0 Error(s), 3 Warning(s).
+diankong\diankong.axf: Error: L6218E: Undefined symbol ModbusRTU_CheckComm (referred from state_machine.o).
+Not enough information to list image symbols.
+Not enough information to list load addresses in the image map.
+Finished: 2 information, 0 warning and 1 error messages.
+"diankong\diankong.axf" - 1 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -61,6 +69,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
+Target not created.
 Build Time Elapsed:  00:00:03
 </pre>
 </body>

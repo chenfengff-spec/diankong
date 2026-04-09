@@ -1,6 +1,7 @@
 #include "state_machine.h"
 #include "usart.h" // 需要访问huart句柄，如果Log_Event或通信函数用到
 #include "gpio.h"  // 需要访问GPIO的宏和函数，如 RUN_LED_GPIO_Port
+#include "modbus_rtu.h"
 
 // ============================================================================
 // 宏定义
@@ -146,24 +147,56 @@ void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_D
 
 // 设备通信检查占位符实现
 bool Communicate_Pump1_Check(void) {
-    Log_Event("Checking Pump1 comm...");
-    HAL_Delay(50);
-    return true; // 实际应根据通信结果返回
+    extern UART_HandleTypeDef huart2; // 声明在 usart.c 中定义的 huart2
+    return ModbusRTU_CheckComm(&huart2, 
+                            RS485_2_DE_Transmit,
+                            RS485_2_DE_Receive,
+                            0x01, // Slave address for Pump1
+                            0x04, // Function code for reading
+                            0x00, //start Address High Byte
+                            0xF1, //start Address Low Byte
+                            0x00, //quantity high Byte
+                            0x01, //quantity low Byte
+                             "Pump1");
 }
 bool Communicate_Pump2_Check(void) {
-    Log_Event("Checking Pump2 comm...");
-    HAL_Delay(50);
-    return true;
+    extern UART_HandleTypeDef huart3; // 声明在 usart.c 中定义的 huart3
+    return ModbusRTU_CheckComm(&huart3, 
+                            RS485_3_DE_Transmit,
+                            RS485_3_DE_Receive,
+                            0x01, // Slave address for Pump1
+                            0x04, // Function code for reading
+                            0x00, //start Address High Byte
+                            0xF1, //start Address Low Byte
+                            0x00, //quantity high Byte
+                            0x01, //quantity low Byte
+                             "Pump2");
 }
 bool Communicate_PulseCollector_Check(void) {
-    Log_Event("Checking Pulse Collector comm...");
-    HAL_Delay(50);
-    return true;
+    extern UART_HandleTypeDef huart4; // 声明在 usart.c 中定义的 huart4
+    return ModbusRTU_CheckComm(&huart1, 
+                            RS485_4_DE_Transmit,
+                            RS485_4_DE_Receive,
+                            0x00, // Slave address for AnalogCollector
+                            0x03, // Function code for reading
+                            0x00, //start Address High Byte
+                            0x10, //start Address Low Byte
+                            0x00, //quantity high Byte
+                            0x0A, //quantity low Byte
+                             "AnalogCollector");
 }
 bool Communicate_AnalogCollector_Check(void) {
-    Log_Event("Checking Analog Collector comm...");
-    HAL_Delay(50);
-    return true;
+    extern UART_HandleTypeDef huart1; // 声明在 usart.c 中定义的 huart1
+    return ModbusRTU_CheckComm(&huart1, 
+                            RS485_1_DE_Transmit,
+                            RS485_1_DE_Receive,
+                            0x01, // Slave address for AnalogCollector
+                            0x03, // Function code for reading
+                            0x00, //start Address High Byte
+                            0x00, //start Address Low Byte
+                            0x00, //quantity high Byte
+                            0x01, //quantity low Byte
+                             "AnalogCollector");
 }
 
 // 蠕动泵控制占位符实现
