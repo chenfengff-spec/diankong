@@ -36,6 +36,22 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+#define RX_BUF_LEN 64
+typedef struct {
+    uint8_t rx_buf[RX_BUF_LEN];
+    uint16_t data_length;
+} rxStruct;
+// [新增]：作业配置结构体（用于调试模式设置）
+typedef struct {
+    TriggerMode_t trigger_mode;
+    union {
+        uint32_t delay_time_ms; // 延时时间 (毫秒)
+        float depth_value;      // 深度触发值 (米)
+    } params;
+} JobConfig_t;
+
+// [新增]：全局作业配置变量
+extern JobConfig_t g_job_config;
 
 /* USER CODE END ET */
 
@@ -73,7 +89,14 @@ void Error_Handler(void);
 #define USART5_DE_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
+#include "usart.h" // 包含 usart.h 以获取 huart6 的声明
 
+// 定义 DEBUG_UART 宏，因为它是全局的调试串口
+#define DEBUG_UART &huart6
+
+// [新增]：声明 debugMode 和 rx1S 变量为外部，因为它们在 main.c/usart.c 中定义
+extern volatile uint8_t debugMode;
+extern rxStruct rx1S;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

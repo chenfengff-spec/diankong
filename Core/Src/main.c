@@ -31,7 +31,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+volatile uint8_t debugMode = 0;
 
+// [新增]：全局作业配置变量的定义
+JobConfig_t g_job_config = {
+    .trigger_mode = TRIGGER_MODE_NONE,
+    .params.delay_time_ms = 0
+};
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -98,6 +104,7 @@ int main(void)
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
   // [修改开始]：在所有硬件外设初始化完成后，初始化并启动状态机
+  HAL_UART_Receive_IT(DEBUG_UART, (uint8_t*)rx1S.rx_buf, 1);
   StateMachine_Init(); // 初始化状态机及其内部变量，并设置DE引脚为接收模式
   // [修改结束]
   /* USER CODE END 2 */
@@ -106,6 +113,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    if (debugMode == 1)
+    {
+        // 调试模式下的操作
+        HandleDebugMode_Independent(); // 调用独立的调试处理函数
+        // 可以根据需要增加延迟，避免CPU空转过快
+        // osDelay(10); // 如果有RTOS，使用 osDelay
+        HAL_Delay(100); // 如果没有RTOS，使用 HAL_Delay
+        continue; // 跳过状态机的正常执行
+    }
     // [修改开始]：在主循环中周期性地调用状态机运行函数
     StateMachine_Run(); // 执行状态机逻辑，根据当前状态进行处理和状态转换
     // 可以在这里添加一些低优先级、非实时的后台任务，或者睡眠/低功耗模式

@@ -22,8 +22,13 @@
 
 /* USER CODE BEGIN 0 */
 #include "stdio.h"
+#include "main.h" 
+#include <string.h> 
 uint8_t aRx1Buffer;
-
+rxStruct rx1S = {
+    .rx_buf = {0},
+    .data_length = 0
+};
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart4;
@@ -513,7 +518,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 int fputc(int ch, FILE *f)
 {
-    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+    HAL_UART_Transmit(&huart6, (uint8_t *)&ch, 1, 0xffff);
     return ch;
 }
  
@@ -525,7 +530,7 @@ int fputc(int ch, FILE *f)
 int fgetc(FILE *f)
 {
     uint8_t ch = 0;
-    HAL_UART_Receive(&huart1, &ch, 1, 0xffff);
+    HAL_UART_Receive(&huart6, &ch, 1, 0xffff);
     return ch;
 }
 
@@ -533,11 +538,33 @@ int fgetc(FILE *f)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if(huart->Instance == USART1)
+    if (huart->Instance == USART6)
     {
-        HAL_UART_Transmit(&huart1, (uint8_t *)&aRx1Buffer, 1, 0xffff);
-        HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRx1Buffer, 1);
+        // 1. 将接收到的字节添加到缓冲区
+        // 检查缓冲区是否已满
+        if (rx1S.data_length >= RX_BUF_LEN) {
+          // 缓冲区溢出，清空缓冲区并重置长度，发送警告 (可选)
+            memset(rx1S.rx_buf, 0x00, RX_BUF_LEN);
+            rx1S.data_length = 0;
+            // 如果需要，可以在这里发送一个串口警告
+            // HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"Buffer Overflow! Cleared.\r\n", strlen("Buffer Overflow! Cleared.\r\n"), 0xFF);
+        } else {
+          rx1S.rx_buf[rx1S.data_length++] = aRx1Buffer;
+            // 3. 检查是否是 "debug" 命令
+            if (debugMode == 0 && rx1S.data_length == 7 && rx1S.rx_buf[5] == 0x0D && rx1S.rx_buf[6] == 0x0A &&
+            memcmp(rx1S.rx_buf, "debug", 5) == 0) {
+                debugMode = 1; // 激活调试模式
+                memset(rx1S.rx_buf, 0x00, RX_BUF_LEN);
+                rx1S.data_length = 0;
+                HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#进入调试模式#\r\n", strlen("\r\n#进入调试模式#\r\n"), 0xFF);
+                // 不清空缓冲区，交由主循环的 HandleDebugMode_Independent() 处理和清空
+              }
+            
+        }
+        // 4. 重新使能 UART 接收中断，接收下一个字节到 aRx1Buffer
+        HAL_UART_Receive_IT(DEBUG_UART, &aRx1Buffer, 1);
     }
-		  HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRx1Buffer, 1);
 }
+    
+             
 /* USER CODE END 1 */
