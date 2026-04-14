@@ -83,4 +83,37 @@ bool ModbusRTU_CheckComm(UART_HandleTypeDef *huart,
                            uint8_t quantity_low,
                            const char *log_prefix);
 
+// 蠕动泵控制函数声明
+/** 
+  * @brief  启动蠕动泵的 Modbus RTU 控制函数。
+  * @param  huart: UART 句柄。
+  * @param  de_transmit_func: DE 发送函数。
+  * @param  de_receive_func: DE 接收函数。
+  * @param  slave_address: 从机地址。
+  * @param  dir: 方向 (0-1)。
+  * @param  acc: 加速度 (0-255)。
+  * @param  speed: 速度 (0-3000 RPM)。
+  * @param  runTime_10ms: 运行时间，单位 10ms (必须大于0)。
+  * @retval true: 控制成功; false: 控制失败。
+  */
+bool ModbusRTU_PumpStart(UART_HandleTypeDef *huart,
+                         void (*de_transmit_func)(void),
+                         void (*de_receive_func)(void),
+                         uint8_t slave_address,
+                         uint8_t dir, uint8_t acc, uint16_t speed, uint32_t runTime_10ms);
+
+/**
+  * @brief  停止蠕动泵的 Modbus RTU 控制函数。
+  * @param  huart: UART 句柄。
+  * @param  de_transmit_func: DE 发送函数。
+  * @param  de_receive_func: DE 接收函数。
+  * @param  slave_address: 从机地址。
+  * @param  acc: 加速度 (0立即停止，非0缓慢停止)。
+  * @retval true: 控制成功; false: 控制失败。
+  */
+bool ModbusRTU_PumpStop(UART_HandleTypeDef *huart,
+                        void (*de_transmit_func)(void),
+                        void (*de_receive_func)(void),
+                        uint8_t slave_address,
+                        uint8_t acc);
 #endif // MODBUS_RTU_H

@@ -6,6 +6,8 @@
 "diankong\usart.o"
 "diankong\stm32f4xx_it.o"
 "diankong\stm32f4xx_hal_msp.o"
+"diankong\debug_commands.o"
+"diankong\modbus_rtu.o"
 "diankong\stm32f4xx_hal_uart.o"
 "diankong\stm32f4xx_hal_rcc.o"
 "diankong\stm32f4xx_hal_rcc_ex.o"

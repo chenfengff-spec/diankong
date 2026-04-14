@@ -534,8 +534,6 @@ int fgetc(FILE *f)
     return ch;
 }
 
-/* USER CODE BEGIN 1 */
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART6)
@@ -556,7 +554,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 debugMode = 1; // 激活调试模式
                 memset(rx1S.rx_buf, 0x00, RX_BUF_LEN);
                 rx1S.data_length = 0;
-                HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#进入调试模式#\r\n", strlen("\r\n#进入调试模式#\r\n"), 0xFF);
+                HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#debugmode#\r\n", strlen("\r\n#debugmode#\r\n"), 0xFF);
                 // 不清空缓冲区，交由主循环的 HandleDebugMode_Independent() 处理和清空
               }
             

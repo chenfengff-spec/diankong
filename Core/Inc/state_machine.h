@@ -3,6 +3,7 @@
 
 #include "main.h" // 包含 main.h 以获取HAL库相关定义和GPIO宏
 #include <stdbool.h> // 用于 bool 类型
+#include <string.h>
 #include "modbus_rtu.h"
 
 // ============================================================================
@@ -17,16 +18,9 @@ typedef enum {
     STATE_PUMP2_STOPPED_COLLECTION_COMPLETE,
     STATE_PUMP1_RUNNING_CLEANING,
     STATE_SAMPLING_COMPLETE,
+    STATE_DEBUG_MODE,
     STATE_ERROR
 } SystemState_t;
-
-typedef enum {
-    TRIGGER_MODE_NONE,
-    TRIGGER_MODE_DELAY,
-    TRIGGER_MODE_DEPTH,
-    TRIGGER_MODE_DEPTH_OR_DELAY,
-    TRIGGER_MODE_SERIAL_COMMAND
-} TriggerMode_t;
 
 // 记录数据结构体
 typedef struct {
@@ -36,6 +30,10 @@ typedef struct {
     uint32_t pump1_start_time;
     uint32_t pump1_stop_time;
     // 其他需要记录的数据
+    bool pump1_comm_ok; // [新增]自检结果
+    bool pump2_comm_ok; // [新增]自检结果
+    bool pulse_collector_comm_ok; // [新增]自检结果
+    bool analog_collector_comm_ok; // [新增]自检结果
 } SamplingLog_t;
 
 
@@ -43,7 +41,6 @@ typedef struct {
 // 外部访问变量声明
 // ============================================================================
 extern volatile SystemState_t currentSystemState;
-extern TriggerMode_t selectedTriggerMode;
 extern SamplingLog_t g_sampling_log;
 extern bool system_self_check_passed; // 外部声明，可能在其他模块检查
 
@@ -65,11 +62,13 @@ void StateMachine_Init(void);
   */
 void StateMachine_Run(void);
 
+const char* GetTriggerModeString(TriggerMode_t mode);
+
 // 辅助函数声明 (可以在这里声明，也可以在其他驱动模块中声明)
 void TurnOn_RUN_LED(void);
 void TurnOff_RUN_LED(void);
 void Toggle_RUN_LED(void);
-void Log_Event(const char* event_message);
+void Log_Event(const char* format, ...);
 
 // RS485 DE 引脚控制函数声明 (通常会放在各自的驱动文件或gpio文件中)
 // 为了简化，这里先放在一起

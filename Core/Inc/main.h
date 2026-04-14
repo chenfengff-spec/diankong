@@ -41,6 +41,13 @@ typedef struct {
     uint8_t rx_buf[RX_BUF_LEN];
     uint16_t data_length;
 } rxStruct;
+typedef enum {
+    TRIGGER_MODE_NONE,
+    TRIGGER_MODE_DELAY,
+    TRIGGER_MODE_DEPTH,
+    TRIGGER_MODE_DEPTH_OR_DELAY,
+    TRIGGER_MODE_SERIAL_COMMAND
+} TriggerMode_t;
 // [新增]：作业配置结构体（用于调试模式设置）
 typedef struct {
     TriggerMode_t trigger_mode;
@@ -49,9 +56,6 @@ typedef struct {
         float depth_value;      // 深度触发值 (米)
     } params;
 } JobConfig_t;
-
-// [新增]：全局作业配置变量
-extern JobConfig_t g_job_config;
 
 /* USER CODE END ET */
 
@@ -67,6 +71,7 @@ extern JobConfig_t g_job_config;
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
+void HandleDebugMode_Independent(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -90,13 +95,16 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #include "usart.h" // 包含 usart.h 以获取 huart6 的声明
-
+#include <string.h>
 // 定义 DEBUG_UART 宏，因为它是全局的调试串口
 #define DEBUG_UART &huart6
 
 // [新增]：声明 debugMode 和 rx1S 变量为外部，因为它们在 main.c/usart.c 中定义
 extern volatile uint8_t debugMode;
 extern rxStruct rx1S;
+extern uint8_t aRx1Buffer;
+
+extern JobConfig_t g_job_config;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

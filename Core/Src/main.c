@@ -31,13 +31,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-volatile uint8_t debugMode = 0;
 
-// [新增]：全局作业配置变量的定义
-JobConfig_t g_job_config = {
-    .trigger_mode = TRIGGER_MODE_NONE,
-    .params.delay_time_ms = 0
-};
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -53,6 +47,13 @@ JobConfig_t g_job_config = {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+volatile uint8_t debugMode = 0;
+
+// [新增]：全局作业配置变量的定义
+JobConfig_t g_job_config = {
+    .trigger_mode = TRIGGER_MODE_NONE,
+    .params.delay_time_ms = 0
+};
 
 /* USER CODE END PV */
 
@@ -103,7 +104,8 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  // [修改开始]：在所有硬件外设初始化完成后，初始化并启动状态机
+  extern uint8_t aRx1Buffer;
+  Config_Load();
   HAL_UART_Receive_IT(DEBUG_UART, (uint8_t*)rx1S.rx_buf, 1);
   StateMachine_Init(); // 初始化状态机及其内部变量，并设置DE引脚为接收模式
   // [修改结束]

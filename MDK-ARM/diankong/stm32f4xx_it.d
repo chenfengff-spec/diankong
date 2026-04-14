@@ -29,4 +29,7 @@ diankong\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash
 diankong\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 diankong\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 diankong\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+diankong\stm32f4xx_it.o: ../Core/Inc/usart.h
+diankong\stm32f4xx_it.o: ../Core/Inc/main.h
+diankong\stm32f4xx_it.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 diankong\stm32f4xx_it.o: ../Core/Inc/stm32f4xx_it.h

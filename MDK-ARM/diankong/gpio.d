@@ -30,3 +30,6 @@ diankong\gpio.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc
 diankong\gpio.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 diankong\gpio.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 diankong\gpio.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+diankong\gpio.o: ../Core/Inc/usart.h
+diankong\gpio.o: ../Core/Inc/main.h
+diankong\gpio.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

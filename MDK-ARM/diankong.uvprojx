@@ -427,6 +427,21 @@
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f4xx_hal_msp.c</FilePath>
             </File>
+            <File>
+              <FileName>debug_commands.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\debug_commands.h</FilePath>
+            </File>
+            <File>
+              <FileName>debug_commands.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\debug_commands.c</FilePath>
+            </File>
+            <File>
+              <FileName>modbus_rtu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\modbus_rtu.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

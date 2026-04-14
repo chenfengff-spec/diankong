@@ -2,6 +2,10 @@
 #include <string.h> // For memcpy
 #include "usart.h" 
 #include "gpio.h"
+#include <stdio.h>
+
+extern void Log_Event(const char* format, ...);
+extern UART_HandleTypeDef huart6; // Log_Event 可能需要此句柄
 
 // ============================================================================
 // Modbus RTU 通信相关函数实现
@@ -194,4 +198,133 @@ bool ModbusRTU_CheckComm(UART_HandleTypeDef *huart,
         Log_Event("%s comm: Transmit error.", log_prefix);
     }
     return false; // 通信失败
+}
+
+// 蠕动泵控制通用函数实现 
+/**
+  * @brief  启动蠕动泵的 Modbus RTU 控制函数。
+  *         此版本仅支持指定运行时间模式。应答验证简化：仅检查 ModbusRTU_Receive 返回 HAL_OK。
+  * @param  huart: UART 句柄。
+  * @param  de_transmit_func: DE 发送函数。
+  * @param  de_receive_func: DE 接收函数。
+  * @param  slave_address: 从机地址。
+  * @param  dir: 方向 (0-1)。
+  * @param  acc: 加速度 (0-255)。
+  * @param  speed: 速度 (0-3000 RPM)。
+  * @param  runTime_10ms: 运行时间，单位 10ms (必须大于0)。
+  * @retval true: 控制成功; false: 控制失败。
+  */
+bool ModbusRTU_PumpStart(UART_HandleTypeDef *huart,
+                         void (*de_transmit_func)(void),
+                         void (*de_receive_func)(void),
+                         uint8_t slave_address,
+                         uint8_t dir, uint8_t acc, uint16_t speed, uint32_t runTime_10ms) {
+    HAL_StatusTypeDef status = HAL_ERROR;
+    uint8_t response[8]; // Modbus 标准应答帧通常为 8 字节
+
+    uint8_t function_code = 0x10; // Write Multiple Holding Registers
+    uint8_t start_address_high = 0x00;
+    uint8_t start_address_low = 0xF6;
+    uint16_t quantity_of_registers = 0x0004; // 4 个寄存器
+    uint8_t byte_count = 0x08;              // 8 个字节
+
+    // Modbus RTU 请求帧的数据部分 (不含从机地址和功能码，但包含字节数和实际数据)
+    // 重新计算 request_data 的大小，以容纳所有 Modbus 数据
+    uint8_t request_data[9 + 4]; // 5 bytes for StartAddr+QtyReg+ByteCount + 4 bytes for dir+acc+speed + 4 bytes for runTime
+    
+    request_data[0] = start_address_high;
+    request_data[1] = start_address_low;
+    request_data[2] = (uint8_t)(quantity_of_registers >> 8);
+    request_data[3] = (uint8_t)(quantity_of_registers & 0xFF);
+    request_data[4] = byte_count;
+    request_data[5] = dir;
+    request_data[6] = acc;
+    request_data[7] = (uint8_t)(speed >> 8);   // Speed High Byte
+    request_data[8] = (uint8_t)(speed & 0xFF); // Speed Low Byte
+    // 运行时间，单位 10ms
+    request_data[9] = (uint8_t)(runTime_10ms >> 24); // runTime Byte 3
+    request_data[10] = (uint8_t)(runTime_10ms >> 16); // runTime Byte 2
+    request_data[11] = (uint8_t)(runTime_10ms >> 8);  // runTime Byte 1
+    request_data[12] = (uint8_t)(runTime_10ms & 0xFF); // runTime Byte 0
+    
+    // 发送 Modbus RTU 运行指令
+    Log_Event("Sending Pump Start command (Addr:0x%02X, Speed:%u, Time:%lu ms)...", slave_address, speed, runTime_10ms * 10);
+    // request_data 的实际总长度是 5 (起始地址+寄存器数量+字节数) + 8 (实际数据) = 13 字节
+    status = ModbusRTU_Transmit(huart, slave_address, function_code, request_data, 13, de_transmit_func, de_receive_func); 
+
+    if (status == HAL_OK) {
+        status = ModbusRTU_Receive(huart, response, slave_address, 100); // 接收超时设为 100ms
+        // [修改开始]：简化验证逻辑
+        if (status == HAL_OK) {
+            Log_Event("Pump 0x%02X Start command ACK OK.", slave_address);
+            return true;
+        } else if (status == HAL_TIMEOUT) {
+            Log_Event("Pump 0x%02X Start command: ACK Timeout.", slave_address);
+        } else { // status == HAL_ERROR (CRC 或地址不匹配)
+            Log_Event("Pump 0x%02X Start command: ACK Receive error.", slave_address);
+        }
+        // [修改结束]
+    } else {
+        Log_Event("Pump 0x%02X Start command: Transmit error.", slave_address);
+    }
+    return false;
+}
+
+/**
+  * @brief  停止蠕动泵的 Modbus RTU 控制函数。
+  *         应答验证简化：仅检查 ModbusRTU_Receive 返回 HAL_OK。
+  * @param  huart: UART 句柄。
+  * @param  de_transmit_func: DE 发送函数。
+  * @param  de_receive_func: DE 接收函数。
+  * @param  slave_address: 从机地址。
+  * @param  acc: 加速度 (0立即停止，非0缓慢停止)。
+  * @retval true: 控制成功; false: 控制失败。
+  */
+bool ModbusRTU_PumpStop(UART_HandleTypeDef *huart,
+                        void (*de_transmit_func)(void),
+                        void (*de_receive_func)(void),
+                        uint8_t slave_address,
+                        uint8_t acc) {
+    HAL_StatusTypeDef status = HAL_ERROR;
+    uint8_t response[8]; // Modbus 标准应答帧通常为 8 字节
+
+    uint8_t function_code = 0x10; // Write Multiple Holding Registers
+    uint8_t start_address_high = 0x00;
+    uint8_t start_address_low = 0xF6;
+    uint16_t quantity_of_registers = 0x0002; // 2 个寄存器
+    uint8_t byte_count = 0x04;              // 4 个字节
+
+    // Modbus RTU 请求帧的数据部分 (不含从机地址和功能码，但包含字节数和实际数据)
+    uint8_t request_data[9]; // 起始地址(2) + 寄存器数量(2) + 字节数(1) + 数据(4)
+    request_data[0] = start_address_high;
+    request_data[1] = start_address_low;
+    request_data[2] = (uint8_t)(quantity_of_registers >> 8);
+    request_data[3] = (uint8_t)(quantity_of_registers & 0xFF);
+    request_data[4] = byte_count;
+    request_data[5] = 0x00; // 方向 (dir) - 停止时通常不关心
+    request_data[6] = acc;  // 加速度 (acc) - 0立即停止，非0缓慢停止
+    request_data[7] = 0x00; // 速度 High Byte (speed) - 停止为 0
+    request_data[8] = 0x00; // 速度 Low Byte (speed) - 停止为 0
+
+    // 发送 Modbus RTU 停止指令
+    Log_Event("Sending Pump Stop command (Addr:0x%02X, Acc:%u)...", slave_address, acc);
+    // request_data 的实际长度是 5 (协议头) + 4 (数据载荷) = 9 字节
+    status = ModbusRTU_Transmit(huart, slave_address, function_code, request_data, 9, de_transmit_func, de_receive_func);
+
+    if (status == HAL_OK) {
+        status = ModbusRTU_Receive(huart, response, slave_address, 100); // 接收超时设为 100ms
+        // [修改开始]：简化验证逻辑
+        if (status == HAL_OK) {
+            Log_Event("Pump 0x%02X Stop command ACK OK.", slave_address);
+            return true;
+        } else if (status == HAL_TIMEOUT) {
+            Log_Event("Pump 0x%02X Stop command: ACK Timeout.", slave_address);
+        } else { // status == HAL_ERROR (CRC 或地址不匹配)
+            Log_Event("Pump 0x%02X Stop command: ACK Receive error.", slave_address);
+        }
+        // [修改结束]
+    } else {
+        Log_Event("Pump 0x%02X Stop command: Transmit error.", slave_address);
+    }
+    return false;
 }
