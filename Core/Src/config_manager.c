@@ -1,48 +1,66 @@
 #include "config_manager.h"
+#include "stm32f4xx_hal.h"
 #include <string.h>
 
-// 根据芯片型号定义 Flash 地址 (例如 STM32F103C8T6 64KB Flash 的最后一页)
-#define FLASH_SAVE_ADDR  0x0800FC00 
-#define CONFIG_MAGIC     0xABCD1234  // 校验标志
-
-void Config_Load(void) {
-    JobConfig_t *flash_ptr = (JobConfig_t *)FLASH_SAVE_ADDR;
-    
-    if (flash_ptr->magic_word == CONFIG_MAGIC) {
-        memcpy(&g_job_config, flash_ptr, sizeof(JobConfig_t));
-    } else {
-        // 第一次运行，设置默认参数
-        g_job_config.magic_word = CONFIG_MAGIC;
-        g_job_config.trigger_mode = TRIGGER_MODE_NONE;
-        g_job_config.params.depth_value = 1.0f;
-        g_job_config.params.delay_time_ms = 1000;
-        // 顺便保存一次初始值
-        Config_Save();
-    }
-}
+// F427VGT6 Sector 11 的起始地址
+#define ADDR_FLASH_SECTOR_11     ((uint32_t)0x080E0000)
+#define FLASH_USER_START_ADDR    ADDR_FLASH_SECTOR_11
+#define FLASH_USER_END_ADDR      ((uint32_t)0x080FFFFF)
 
 void Config_Save(void) {
-    FLASH_EraseInitTypeDef erase_init;
-    uint32_t page_error;
+    FLASH_EraseInitTypeDef EraseInitStruct;
+    uint32_t SectorError = 0;
 
-    HAL_FLASH_Unlock(); // 解锁 Flash
+    // 1. 解锁 Flash
+    HAL_FLASH_Unlock();
 
-    // 擦除配置所在的页
-    erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.PageAddress = FLASH_SAVE_ADDR;
-    erase_init.NbPages = 1;
-    
-    if (HAL_FLASHEx_Erase(&erase_init, &page_error) != HAL_OK) {
-        // 擦除失败处理
+    // 2. 擦除扇区 11
+    // 注意：F4 必须先擦除才能写入新的数据
+    EraseInitStruct.TypeErase     = FLASH_TYPEERASE_SECTORS;
+    EraseInitStruct.VoltageRange  = FLASH_VOLTAGE_RANGE_3; // 对应 2.7V - 3.6V
+    EraseInitStruct.Sector        = FLASH_SECTOR_11;       // 擦除第 11 扇区
+    EraseInitStruct.NbSectors     = 1;
+
+    if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
+        // 擦除失败处理（可选：打印错误）
         HAL_FLASH_Lock();
         return;
     }
 
-    // 按字（32位）写入结构体
-    uint32_t *data_ptr = (uint32_t *)&g_job_config;
-    for (uint32_t i = 0; i < (sizeof(JobConfig_t) + 3) / 4; i++) {
-        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, FLASH_SAVE_ADDR + (i * 4), data_ptr[i]);
+    // 3. 写入数据
+    // F4 支持按字节、半字、字、双字写入。这里建议按“字”(32位) 写入。
+    uint32_t *pData = (uint32_t *)&g_job_config;
+    uint32_t Size = (sizeof(JobConfig_t) + 3) / 4; // 计算需要多少个 32 位字
+    uint32_t Address = FLASH_USER_START_ADDR;
+
+    for (uint32_t i = 0; i < Size; i++) {
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, pData[i]) == HAL_OK) {
+            Address += 4;
+        } else {
+            // 写入失败处理
+            break;
+        }
     }
 
-    HAL_FLASH_Lock(); // 锁定 Flash
+    // 4. 上锁
+    HAL_FLASH_Lock();
+}
+
+void Config_Load(void) {
+    // F4 加载数据非常简单，直接从内存地址读取即可
+    JobConfig_t *pFlash = (JobConfig_t *)FLASH_USER_START_ADDR;
+
+    // 校验魔数
+    if (pFlash->magic_word == 0xABCD1234) {
+        memcpy(&g_job_config, pFlash, sizeof(JobConfig_t));
+    } else {
+        // 默认初始化
+        g_job_config.magic_word = 0xABCD1234;
+        g_job_config.trigger_mode = TRIGGER_MODE_NONE;
+        g_job_config.params.delay_time_ms = 500;
+        g_job_config.params.depth_value = 1.0f;
+        
+        // 第一次运行可以自动保存一次
+        Config_Save();
+    }
 }

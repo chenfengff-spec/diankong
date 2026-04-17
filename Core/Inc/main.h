@@ -51,6 +51,7 @@ typedef enum {
 // [新增]：作业配置结构体（用于调试模式设置）
 typedef struct {
     TriggerMode_t trigger_mode;
+    uint32_t magic_word;
     union {
         uint32_t delay_time_ms; // 延时时间 (毫秒)
         float depth_value;      // 深度触发值 (米)
@@ -97,7 +98,7 @@ void HandleDebugMode_Independent(void);
 #include "usart.h" // 包含 usart.h 以获取 huart6 的声明
 #include <string.h>
 // 定义 DEBUG_UART 宏，因为它是全局的调试串口
-#define DEBUG_UART &huart6
+#define DEBUG_UART &huart5
 
 // [新增]：声明 debugMode 和 rx1S 变量为外部，因为它们在 main.c/usart.c 中定义
 extern volatile uint8_t debugMode;

@@ -536,7 +536,7 @@ int fgetc(FILE *f)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (huart->Instance == USART6)
+    if (huart->Instance == USART5)
     {
         // 1. 将接收到的字节添加到缓冲区
         // 检查缓冲区是否已满

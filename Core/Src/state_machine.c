@@ -3,6 +3,7 @@
 #include "gpio.h"  // 需要访问GPIO的宏和函数，如 RUN_LED_GPIO_Port
 #include "modbus_rtu.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 
 // ============================================================================
@@ -22,7 +23,7 @@
 // 外部访问变量定义
 // ============================================================================
 volatile SystemState_t currentSystemState = STATE_INITIAL;
-TriggerMode_t selectedTriggerMode = TRIGGER_MODE_NONE;
+
 SamplingLog_t g_sampling_log;
 bool system_self_check_passed = false; // 综合自检结果
 
@@ -85,9 +86,8 @@ void Log_Event(const char* format, ...) {
     va_end(args);
 
     // 实际实现：通过 DEBUG_UART (huart6) 打印日志
-    extern UART_HandleTypeDef huart6; // 声明外部 huart6 句柄
-    HAL_UART_Transmit(&huart6, (uint8_t*)log_buffer, strlen(log_buffer), 100);
-    HAL_UART_Transmit(&huart6, (uint8_t*)"\r\n", 2, 100); // 换行
+    HAL_UART_Transmit(DEBUG_UART, (uint8_t*)log_buffer, strlen(log_buffer), 100);
+    HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n", 2, 100); // 换行
 }
 
 // RS485 DE 引脚控制实现 (假定宏已在 gpio.h 或 main.h 中定义)
@@ -241,9 +241,62 @@ void Pump2_Stop(void) {
 }
 
 // 传感器数据获取占位符实现
+/**
+  * @brief  从模拟量采集表获取深度值。
+  *         读取保持寄存器 0x0002 和 0x0003 的单精度浮点型数据。
+  * @param  None
+  * @retval 浮点型深度值。如果读取失败，返回 0.0f。
+  */
 float Get_Depth_Value(void) {
-    // 通过RS485_1向模拟量采集表查询深度值
-    return 10.5f; // 示例深度值
+    extern UART_HandleTypeDef huart1; // 模拟量采集表连接到 USART1
+    HAL_StatusTypeDef status = HAL_ERROR;
+    uint8_t response[9]; // 最小响应帧 (01 03 04 DataByte0..3 CRC) = 3 + 4 + 2 = 9 字节
+    uint8_t slave_address = 0x01; // 模拟量采集表的 Modbus 地址
+    uint8_t function_code = 0x03; // Read Holding Registers (读取保持寄存器)
+
+    // 请求数据：起始地址 0x0002，寄存器数量 2 (单精度浮点数占用 2 个寄存器)
+    uint8_t request_data[4] = {
+        0x00, 0x02, // Starting Address: 0x0002 (量程变换高位)
+        0x00, 0x02  // Quantity of Registers: 2 (for a single-precision float)
+    };
+
+    float depth_value = 0.0f;
+
+    // 发送 Modbus RTU 请求
+    Log_Event("Querying Analog Collector for Depth...");
+    status = ModbusRTU_Transmit(&huart1, slave_address, function_code, request_data, sizeof(request_data), RS485_1_DE_Transmit, RS485_1_DE_Receive);
+
+    if (status == HAL_OK) {
+        status = ModbusRTU_Receive(&huart1, response, slave_address, 100); // 接收超时 100ms
+        // 简化验证逻辑：仅检查 ModbusRTU_Receive 返回 HAL_OK。
+        if (status == HAL_OK) {
+            // 校验响应帧格式：地址 0x01，功能码 0x03，字节数 0x04 (2个寄存器 * 2字节/寄存器)
+            if (response[2] == 0x04) // 数据字节数应为 4
+            {
+                // 将 4 个字节组装成一个 32 位浮点数
+                uint32_t temp_float_bytes = (uint32_t)(response[3] << 24) |
+                                            (uint32_t)(response[4] << 16) |
+                                            (uint32_t)(response[5] << 8)  |
+                                            (uint32_t)(response[6]);
+                
+                // 将 32 位无符号整数转换为浮点数
+                // 注意：这里需要通过联合体或类型转换来实现，假设编译器支持 IEEE 754 浮点数
+                memcpy(&depth_value, &temp_float_bytes, sizeof(float));
+
+                Log_Event("Analog Collector Depth: %.2f m", depth_value);
+                return depth_value;
+            } else {
+                Log_Event("Analog Collector: Received ACK OK, but data byte count is incorrect (%u instead of 4).", response[2]);
+            }
+        } else if (status == HAL_TIMEOUT) {
+            Log_Event("Analog Collector: Response Timeout.");
+        } else { // status == HAL_ERROR (CRC 或地址不匹配)
+            Log_Event("Analog Collector: Receive Error.");
+        }
+    } else {
+        Log_Event("Analog Collector: Transmit Error.");
+    }
+    return 0.0f; // 读取失败返回 0.0f
 }
 /**
   * @brief  从脉冲信号采集器获取电子流量表的脉冲计数。
@@ -343,12 +396,26 @@ static void State_Handle_SelfCheck(void) {
     if (pump1_comm_ok && pump2_comm_ok && pulse_collector_comm_ok && analog_collector_comm_ok) {
         system_self_check_passed = true;
         Log_Event("System self-check PASSED.");
+
+        g_sampling_log.pump1_comm_ok_log = pump1_comm_ok;
+        g_sampling_log.pump2_comm_ok_log = pump2_comm_ok;
+        g_sampling_log.pulse_collector_comm_ok_log = pulse_collector_comm_ok;
+        g_sampling_log.analog_collector_comm_ok_log = analog_collector_comm_ok;
+        g_sampling_log.system_self_check_overall_ok = system_self_check_passed;
+        
         currentSystemState = STATE_WAITING_FOR_TRIGGER_MODE_SELECTION;
         self_check_start_tick = 0;
         TurnOff_RUN_LED();
     }
     else if ((HAL_GetTick() - self_check_start_tick > SYSTEM_SELF_CHECK_TIMEOUT_MS) && !system_self_check_passed) {
         Log_Event("System self-check FAILED or TIMEOUT.");
+
+        g_sampling_log.pump1_comm_ok_log = pump1_comm_ok;
+        g_sampling_log.pump2_comm_ok_log = pump2_comm_ok;
+        g_sampling_log.pulse_collector_comm_ok_log = pulse_collector_comm_ok;
+        g_sampling_log.analog_collector_comm_ok_log = analog_collector_comm_ok;
+        g_sampling_log.system_self_check_overall_ok = system_self_check_passed; 
+
         currentSystemState = STATE_ERROR;
         self_check_start_tick = 0;
     }
@@ -514,7 +581,7 @@ static void State_Handle_Error(void) {
 
 void StateMachine_Init(void) {
     currentSystemState = STATE_INITIAL;
-    selectedTriggerMode = TRIGGER_MODE_NONE;
+    g_job_config.trigger_mode = TRIGGER_MODE_NONE;
     memset(&g_sampling_log, 0, sizeof(SamplingLog_t));
     system_self_check_passed = false;
     // 初始化所有RS485的DE引脚为接收模式

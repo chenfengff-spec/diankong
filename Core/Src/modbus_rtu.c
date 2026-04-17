@@ -105,6 +105,17 @@ HAL_StatusTypeDef ModbusRTU_Transmit(UART_HandleTypeDef *huart,
   *     - HAL_TIMEOUT: 接收超时.
   *     - HAL_ERROR: 接收到错误数据或校验失败.
   */
+/**
+  * @brief  通过指定的 UART/USART 接收 Modbus RTU 响应帧.
+  * @param  huart: HAL 库的 UART_HandleTypeDef 句柄.
+  * @param  response: 指向接收缓冲区 (至少 8 字节) 的指针.
+  * @param  expected_slave_address: 期望的从机地址.
+  * @param  timeout: 接收超时时间 (毫秒).
+  * @retval HAL_StatusTypeDef:
+  *     - HAL_OK: 成功接收到期望的响应.
+  *     - HAL_TIMEOUT: 接收超时.
+  *     - HAL_ERROR: 接收到错误数据或校验失败.
+  */
 HAL_StatusTypeDef ModbusRTU_Receive(UART_HandleTypeDef *huart,
                                     uint8_t *response,
                                     uint8_t expected_slave_address,
@@ -112,32 +123,63 @@ HAL_StatusTypeDef ModbusRTU_Receive(UART_HandleTypeDef *huart,
     uint32_t start_time = HAL_GetTick();
     uint16_t received_length = 0;
     uint16_t crc_received, crc_calculated;
+    uint8_t byte;
 
-    // 1. 循环接收数据直到超时或接收到完整帧
+    // 1. 等待并接收帧的第一个字节 (总超时控制)
     while (HAL_GetTick() - start_time < timeout) {
-        uint8_t byte;
-        if (HAL_UART_Receive(huart, &byte, 1, 1) == HAL_OK) { // 每次接收一个字节，超时1ms
+        if (HAL_UART_Receive(huart, &byte, 1, 1) == HAL_OK) {
+            // 收到了第一个字节！
             response[received_length++] = byte;
-            // 简化的帧完整性判断：假设至少需要 8 字节才能构成一个完整的Modbus帧 (地址+功能码+至少1字节数据+2字节CRC)
-            if (received_length >= 8) {
-                // 尝试进行CRC校验和地址检查
-                crc_received = (response[received_length - 1] << 8) | response[received_length - 2];
-                crc_calculated = ModbusRTU_CRC(response, received_length - 2);
-
-                if (crc_received == crc_calculated && response[0] == expected_slave_address) {
-                    // 校验成功，并且地址匹配，认为接收完成
-                    return HAL_OK;
-                } else {
-                    // 校验失败或地址不匹配，清空缓冲区重新接收
-                    received_length = 0;
-                }
-            }
+            break; // 跳出等待第一个字节的循环
         }
-        // 可以添加一些小的延时，降低CPU占用率，但也会增加总的响应时间
-        // HAL_Delay(1);
     }
-    // 超时
-    return HAL_TIMEOUT;
+
+    // 如果总超时时间到了还没收到第一个字节
+    if (received_length == 0) {
+        return HAL_TIMEOUT;
+    }
+
+    // 2. 连续接收后续字节 (字节间超时控制)
+    // 只要能在 10ms (或更短) 内收到下一个字节，就认为是一帧
+    // 对于手动发送，10ms 可能太短，建议增加到 50ms 或 100ms
+    uint32_t byte_timeout = 50; // 字节间超时时间，根据手动发送速度调整
+
+    while (1) {
+        if (HAL_UART_Receive(huart, &byte, 1, byte_timeout) == HAL_OK) {
+            // 收到了后续字节
+            if (received_length < 256) { // 防溢出
+                response[received_length++] = byte;
+            }
+        } else {
+            // 字节间超时，认为这一帧数据已经接收完毕
+            break; 
+        }
+    }
+
+    // 3. 帧接收完毕，进行最终校验
+    // 最短的 Modbus 帧是 5 字节 (地址 + 异常功能码 + 异常码 + 2字节 CRC)
+    if (received_length >= 5) {
+        // 检查地址
+        if (response[0] == expected_slave_address) {
+            // 提取并计算 CRC (注意小端序)
+            crc_received = (response[received_length - 1] << 8) | response[received_length - 2];
+            crc_calculated = ModbusRTU_CRC(response, received_length - 2);
+
+            if (crc_received == crc_calculated) {
+                return HAL_OK; // 校验成功
+            } else {
+                 // 可以加日志辅助调试
+                // extern void Log_Event(const char* format, ...);
+                // Log_Event("Modbus Rx CRC Error. Calc: %04X, Rcv: %04X", crc_calculated, crc_received);
+            }
+        } else {
+            // 地址不匹配
+        }
+    }
+
+    // 如果长度不够，或者校验/地址错误，统一返回 ERROR
+    // 因为这通常意味着接收到了残缺或错误的数据包
+    return HAL_ERROR; 
 }
 
 /**

@@ -442,6 +442,16 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\modbus_rtu.c</FilePath>
             </File>
+            <File>
+              <FileName>config_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\config_manager.c</FilePath>
+            </File>
+            <File>
+              <FileName>config_manager.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\config_manager.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

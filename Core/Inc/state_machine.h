@@ -30,10 +30,11 @@ typedef struct {
     uint32_t pump1_start_time;
     uint32_t pump1_stop_time;
     // 其他需要记录的数据
-    bool pump1_comm_ok; // [新增]自检结果
-    bool pump2_comm_ok; // [新增]自检结果
-    bool pulse_collector_comm_ok; // [新增]自检结果
-    bool analog_collector_comm_ok; // [新增]自检结果
+    bool pump1_comm_ok_log;         // 泵1通信检查结果
+    bool pump2_comm_ok_log;         // 泵2通信检查结果
+    bool pulse_collector_comm_ok_log; // 脉冲采集器通信检查结果
+    bool analog_collector_comm_ok_log; // 模拟量采集器通信检查结果
+    bool system_self_check_overall_ok; // 整体自检是否通过
 } SamplingLog_t;
 
 
