@@ -73,7 +73,8 @@ HAL_StatusTypeDef ModbusRTU_Transmit(UART_HandleTypeDef *huart,
     de_transmit_func(); // e.g., RS485_1_DE_Transmit();
 
     // 5. 发送 Modbus RTU 帧
-    status = HAL_UART_Transmit(huart, frame, frame_length, 100); // 超时设为 100ms
+    HAL_Delay(100); // 确保 DE 引脚切换完成，具体延时根据硬件特性调整
+    status = HAL_UART_Transmit(huart, frame, frame_length, 100);
 
     // 6. 等待发送完成 (重要!)
     if (status == HAL_OK) {
@@ -129,11 +130,13 @@ HAL_StatusTypeDef ModbusRTU_Receive(UART_HandleTypeDef *huart,
     while (HAL_GetTick() - start_time < timeout) {
         if (HAL_UART_Receive(huart, &byte, 1, 1) == HAL_OK) {
             // 收到了第一个字节！
-            response[received_length++] = byte;
-            break; // 跳出等待第一个字节的循环
+            if (byte == expected_slave_address) {
+                // 收到了真正的帧头！
+                response[received_length++] = byte;
+                break; // 跳出等待第一个字节的循环
+            }
         }
     }
-
     // 如果总超时时间到了还没收到第一个字节
     if (received_length == 0) {
         return HAL_TIMEOUT;
@@ -142,7 +145,7 @@ HAL_StatusTypeDef ModbusRTU_Receive(UART_HandleTypeDef *huart,
     // 2. 连续接收后续字节 (字节间超时控制)
     // 只要能在 10ms (或更短) 内收到下一个字节，就认为是一帧
     // 对于手动发送，10ms 可能太短，建议增加到 50ms 或 100ms
-    uint32_t byte_timeout = 50; // 字节间超时时间，根据手动发送速度调整
+    uint32_t byte_timeout = 10; // 字节间超时时间，根据手动发送速度调整
 
     while (1) {
         if (HAL_UART_Receive(huart, &byte, 1, byte_timeout) == HAL_OK) {
@@ -157,9 +160,9 @@ HAL_StatusTypeDef ModbusRTU_Receive(UART_HandleTypeDef *huart,
     }
 
     // 3. 帧接收完毕，进行最终校验
-    // 最短的 Modbus 帧是 5 字节 (地址 + 异常功能码 + 异常码 + 2字节 CRC)
+    // 最短的 Modbus 帧是 5 字节 (地址 + 异常功能码 + 异常码 + 2字节 CRC
     if (received_length >= 5) {
-        // 检查地址
+        // 检查
         if (response[0] == expected_slave_address) {
             // 提取并计算 CRC (注意小端序)
             crc_received = (response[received_length - 1] << 8) | response[received_length - 2];
@@ -167,16 +170,14 @@ HAL_StatusTypeDef ModbusRTU_Receive(UART_HandleTypeDef *huart,
 
             if (crc_received == crc_calculated) {
                 return HAL_OK; // 校验成功
-            } else {
-                 // 可以加日志辅助调试
-                // extern void Log_Event(const char* format, ...);
-                // Log_Event("Modbus Rx CRC Error. Calc: %04X, Rcv: %04X", crc_calculated, crc_received);
+            }
+            else{
+
             }
         } else {
             // 地址不匹配
         }
     }
-
     // 如果长度不够，或者校验/地址错误，统一返回 ERROR
     // 因为这通常意味着接收到了残缺或错误的数据包
     return HAL_ERROR; 
@@ -208,7 +209,7 @@ bool ModbusRTU_CheckComm(UART_HandleTypeDef *huart,
                            const char *log_prefix) {
 
     HAL_StatusTypeDef status = HAL_ERROR;
-    uint8_t response[8]; // 至少 8 字节，用于存放 Modbus 响应帧
+    uint8_t response[16]; // 至少 8 字节，用于存放 Modbus 响应帧
 
     // 准备 Modbus RTU 查询数据
     uint8_t data[4] = {
@@ -223,21 +224,21 @@ bool ModbusRTU_CheckComm(UART_HandleTypeDef *huart,
 
     // 如果发送成功，则尝试接收响应
     if (status == HAL_OK) {
-        status = ModbusRTU_Receive(huart, response, slave_address, 50); // 超时设为 50ms
-
+        status = ModbusRTU_Receive(huart, response, slave_address, 5000); // 超时设为 50ms
         // 仅仅检查 ModbusRTU_Receive 的返回值，确保接收成功且校验通过
         if (status == HAL_OK) {
             // 既然收到了数据，就打印通信成功即可
             Log_Event("%s comm OK.", log_prefix);
             return true; // 通信成功
-        } else if (status == HAL_TIMEOUT) {
+        } if (status == HAL_TIMEOUT) {
             Log_Event("%s comm: Timeout.", log_prefix);
-        } else {
-            // status == HAL_ERROR 表明在 ModbusRTU_Receive 内部发生了错误（例如 CRC 校验失败或地址不匹配）
+        } else if(status == HAL_ERROR){
+            //status == HAL_ERROR 表明在 ModbusRTU_Receive 内部发生了错误（例如 CRC 校验失败或地址不匹配）
             Log_Event("%s comm: Receive error (CRC or address mismatch).", log_prefix);
         }
     } else {
         Log_Event("%s comm: Transmit error.", log_prefix);
+        
     }
     return false; // 通信失败
 }
@@ -308,6 +309,64 @@ bool ModbusRTU_PumpStart(UART_HandleTypeDef *huart,
         // [修改结束]
     } else {
         Log_Event("Pump 0x%02X Start command: Transmit error.", slave_address);
+    }
+    return false;
+}
+
+/**
+  * @brief  清零脉冲信号采集器的 DI0 计数。
+  *         向保持寄存器 0x0010 和 0x0011 写入 0。
+  * @param  None
+  * @retval true: 清零命令发送并收到正确应答; false: 失败。
+  */
+bool Reset_Flow_Pulse_Count(void) {
+    extern UART_HandleTypeDef huart4;
+    HAL_StatusTypeDef status = HAL_ERROR;
+    uint8_t response[8]; // 10H 功能码的标准应答帧是 8 字节
+    
+    // 请确认脉冲采集器的实际地址。在之前的 Communicate_PulseCollector_Check 中
+    // 您使用的是 0x00 (广播地址) 或 0x01。这里建议使用具体地址，假设为 0x01。
+    uint8_t slave_address = 0x01; 
+    uint8_t function_code = 0x10; // 写多路寄存器
+
+    // 构建请求数据载荷 (不含地址和功能码)
+    // 格式: 起始地址(2) + 寄存器数量(2) + 字节计数(1) + 寄存器数据(4)
+    uint8_t request_data[9] = {
+        0x00, 0x10, // Starting Address Hi, Lo
+        0x00, 0x02, // Quantity of Registers Hi, Lo (2 个寄存器)
+        0x04,       // Byte Count (4 个字节)
+        0x00, 0x00, // Data for Register 0x0010 (清零高 16 位)
+        0x00, 0x00  // Data for Register 0x0011 (清零低 16 位)
+    };
+
+    Log_Event("Sending command to reset Pulse Collector DI0 count...");
+    
+    // 发送 Modbus RTU 请求
+    // 注意替换为您实际使用的 RS485 DE 控制函数宏
+    status = ModbusRTU_Transmit(&huart4, slave_address, function_code, request_data, sizeof(request_data), RS485_4_DE_Transmit, RS485_4_DE_Receive);
+
+    if (status == HAL_OK) {
+        status = ModbusRTU_Receive(&huart4, response, slave_address, 1000); // 接收超时 1000ms
+        if (status == HAL_OK) {
+            // 校验应答帧格式
+            // 期望的应答: 从站地址(1) | 功能码(10H) | 起始地址(0010) | 寄存器数量(0002) | CRC
+            if (response[0] == slave_address &&
+                response[1] == function_code &&
+                response[2] == 0x00 && response[3] == 0x10 &&
+                response[4] == 0x00 && response[5] == 0x02) {
+                
+                Log_Event("Pulse Collector DI0 count reset successfully.");
+                return true;
+            } else {
+                Log_Event("Pulse Collector reset: Received Invalid ACK format.");
+            }
+        } else if (status == HAL_TIMEOUT) {
+            Log_Event("Pulse Collector reset: ACK Timeout.");
+        } else {
+            Log_Event("Pulse Collector reset: ACK Receive error.");
+        }
+    } else {
+        Log_Event("Pulse Collector reset: Transmit error.");
     }
     return false;
 }

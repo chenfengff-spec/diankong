@@ -1,14 +1,14 @@
 --cpu=Cortex-M4.fp
 "diankong\startup_stm32f427xx.o"
 "diankong\state_machine.o"
+"diankong\debug_commands.o"
+"diankong\modbus_rtu.o"
+"diankong\config_manager.o"
 "diankong\main.o"
 "diankong\gpio.o"
 "diankong\usart.o"
 "diankong\stm32f4xx_it.o"
 "diankong\stm32f4xx_hal_msp.o"
-"diankong\debug_commands.o"
-"diankong\modbus_rtu.o"
-"diankong\config_manager.o"
 "diankong\stm32f4xx_hal_uart.o"
 "diankong\stm32f4xx_hal_rcc.o"
 "diankong\stm32f4xx_hal_rcc_ex.o"
@@ -24,7 +24,7 @@
 "diankong\stm32f4xx_hal.o"
 "diankong\stm32f4xx_hal_exti.o"
 "diankong\system_stm32f4xx.o"
---strict --scatter "diankong\diankong.sct"
+--library_type=microlib --strict --scatter "diankong\diankong.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "diankong.map" -o diankong\diankong.axf

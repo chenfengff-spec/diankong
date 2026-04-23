@@ -106,26 +106,33 @@ int main(void)
   /* USER CODE BEGIN 2 */
   extern uint8_t aRx1Buffer;
   Config_Load();
-  HAL_UART_Receive_IT(DEBUG_UART, (uint8_t*)rx1S.rx_buf, 1);
-  StateMachine_Init(); // 初始化状态机及其内部变量，并设置DE引脚为接收模式
+  HAL_UART_Receive_IT(DEBUG_UART, &aRx1Buffer, 1);
+  static uint32_t current_pulse_count = 0;
   // [修改结束]
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_Delay(5000); // 示例：系统启动后等待1秒，给调试工具连接的时间
   while (1)
-  {
+  { 
     if (debugMode == 1)
     {
         // 调试模式下的操作
         HandleDebugMode_Independent(); // 调用独立的调试处理函数
         // 可以根据需要增加延迟，避免CPU空转过快
         // osDelay(10); // 如果有RTOS，使用 osDelay
-        HAL_Delay(100); // 如果没有RTOS，使用 HAL_Delay
+        HAL_Delay(1000); // 如果没有RTOS，使用 HAL_Delay
+				TurnOn_RUN_LED();
+				HAL_Delay(1000); // 如果没有RTOS，使用 HAL_Delay
+				TurnOff_RUN_LED();
         continue; // 跳过状态机的正常执行
     }
+    
+    //HAL_Delay(1000); // 示例：每隔 500ms 检查一次停止条件
+    //current_pulse_count = Get_Flow_Pulse_Count();
     // [修改开始]：在主循环中周期性地调用状态机运行函数
-    //StateMachine_Run(); // 执行状态机逻辑，根据当前状态进行处理和状态转换
+    StateMachine_Run(); // 执行状态机逻辑，根据当前状态进行处理和状态转换
     // 可以在这里添加一些低优先级、非实时的后台任务，或者睡眠/低功耗模式
     // [修改结束]
     /* USER CODE END WHILE */
@@ -147,7 +154,7 @@ void SystemClock_Config(void)
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -156,8 +163,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 180;
+  RCC_OscInitStruct.PLL.PLLM = 12;
+  RCC_OscInitStruct.PLL.PLLN = 144;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -174,7 +181,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }

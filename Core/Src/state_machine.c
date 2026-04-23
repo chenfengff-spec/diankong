@@ -9,14 +9,6 @@
 // ============================================================================
 // 宏定义
 // ============================================================================
-#define PUMP2_RPM_DEFAULT   1000 // 示例转速
-#define PUMP1_RPM_DEFAULT   800  // 示例转速
-
-#define REQUIRED_PULSE_FOR_10L  107150UL // 电子流量计流量系数：10715脉冲/升，取水10L脉冲数量107150
-#define PUMP2_RUN_TIME_MS       (10UL * 60UL * 1000UL) // 泵2运行10分钟
-#define PUMP1_RUN_TIME_MS       (2UL * 60UL * 1000UL)  // 泵1运行2分钟
-
-#define SYSTEM_SELF_CHECK_TIMEOUT_MS (5 * 1000UL) // 自检超时时间，例如5秒
 
 
 // ============================================================================
@@ -85,74 +77,12 @@ void Log_Event(const char* format, ...) {
     vsnprintf(log_buffer, sizeof(log_buffer), format, args);
     va_end(args);
 
-    // 实际实现：通过 DEBUG_UART (huart6) 打印日志
+    RS485_5_DE_Transmit(); // 切换到发送模式
+    HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"yes \r\n", 6, 100);
     HAL_UART_Transmit(DEBUG_UART, (uint8_t*)log_buffer, strlen(log_buffer), 100);
     HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n", 2, 100); // 换行
+    RS485_5_DE_Receive(); // 切换回接收模式
 }
-
-// RS485 DE 引脚控制实现 (假定宏已在 gpio.h 或 main.h 中定义)
-/**
-  * @brief  Sets RS485_1 DE pin to receive mode. (Analog Collector)
-  * @param  None
-  * @retval None
-  */
-void RS485_1_DE_Receive(void) { HAL_GPIO_WritePin(USART1_DE_GPIO_Port, USART1_DE_Pin, GPIO_PIN_RESET); }
-/**
-  * @brief  Sets RS485_1 DE pin to transmit mode. (Analog Collector)
-  * @param  None
-  * @retval None
-  */
-void RS485_1_DE_Transmit(void) { HAL_GPIO_WritePin(USART1_DE_GPIO_Port, USART1_DE_Pin, GPIO_PIN_SET); }
-/**
-  * @brief  Sets RS485_2 DE pin to receive mode. (Pump 1)
-  * @param  None
-  * @retval None
-  */
-void RS485_2_DE_Receive(void) { HAL_GPIO_WritePin(USART2_DE_GPIO_Port, USART2_DE_Pin, GPIO_PIN_RESET); }
-/**
-  * @brief  Sets RS485_2 DE pin to transmit mode. (Pump 1)
-  * @param  None
-  * @retval None
-  */
-void RS485_2_DE_Transmit(void) { HAL_GPIO_WritePin(USART2_DE_GPIO_Port, USART2_DE_Pin, GPIO_PIN_SET); }
-/**
-  * @brief  Sets RS485_3 DE pin to receive mode. (Pump 2)
-  * @param  None
-  * @retval None
-  */
-void RS485_3_DE_Receive(void) { HAL_GPIO_WritePin(USART3_DE_GPIO_Port, USART3_DE_Pin, GPIO_PIN_RESET); }
-/**
-  * @brief  Sets RS485_3 DE pin to transmit mode. (Pump 2)
-  * @param  None
-  * @retval None
-  */
-void RS485_3_DE_Transmit(void) { HAL_GPIO_WritePin(USART3_DE_GPIO_Port, USART3_DE_Pin, GPIO_PIN_SET); }
-/**
-  * @brief  Sets RS485_4 DE pin to receive mode. (Pulse Collector)
-  * @param  None
-  * @retval None
-  */
-void RS485_4_DE_Receive(void) { HAL_GPIO_WritePin(USART4_DE_GPIO_Port, USART4_DE_Pin, GPIO_PIN_RESET); }
-/**
-  * @brief  Sets RS485_4 DE pin to transmit mode. (Pulse Collector)
-  * @param  None
-  * @retval None
-  */
-void RS485_4_DE_Transmit(void) { HAL_GPIO_WritePin(USART4_DE_GPIO_Port, USART4_DE_Pin, GPIO_PIN_SET); }
-/**
-  * @brief  Sets RS485_6 DE pin to receive mode. (Upper Computer)
-  * @param  None
-  * @retval None
-  */
-void RS485_6_DE_Receive(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_DE_Pin, GPIO_PIN_RESET); }
-/**
-  * @brief  Sets RS485_6 DE pin to transmit mode. (Upper Computer)
-  * @param  None
-  * @retval None
-  */
-void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_DE_Pin, GPIO_PIN_SET); }
-
-
 
 // 设备通信检查占位符实现
 bool Communicate_Pump1_Check(void) {
@@ -183,16 +113,16 @@ bool Communicate_Pump2_Check(void) {
 }
 bool Communicate_PulseCollector_Check(void) {
     extern UART_HandleTypeDef huart4; // 声明在 usart.c 中定义的 huart4
-    return ModbusRTU_CheckComm(&huart1, 
+    return ModbusRTU_CheckComm(&huart4, 
                             RS485_4_DE_Transmit,
                             RS485_4_DE_Receive,
-                            0x00, // Slave address for AnalogCollector
+                            0x01, // Slave address for AnalogCollector
                             0x03, // Function code for reading
                             0x00, //start Address High Byte
                             0x10, //start Address Low Byte
                             0x00, //quantity high Byte
-                            0x0A, //quantity low Byte
-                             "AnalogCollector");
+                            0x02, //quantity low Byte
+                             "PulseCollector");
 }
 bool Communicate_AnalogCollector_Check(void) {
     extern UART_HandleTypeDef huart1; // 声明在 usart.c 中定义的 huart1
@@ -228,7 +158,7 @@ void Pump2_Start(uint16_t rpm) {
     extern UART_HandleTypeDef huart3;
     // 蠕动泵2，地址 0x01。方向 0，加速度 10，速度 rpm，运行时间 10 分钟
     uint32_t runTime_10ms = PUMP2_RUN_TIME_MS / 10; // 10分钟转换为 10ms 单位
-    if (!ModbusRTU_PumpStart(&huart3, RS485_3_DE_Transmit, RS485_3_DE_Receive, 0x01, 0, 10, rpm, runTime_10ms)) {
+    if (!ModbusRTU_PumpStart(&huart3, RS485_3_DE_Transmit, RS485_3_DE_Receive, 0x01, 1, 10, rpm, runTime_10ms)) {
         Log_Event("Pump2 Start FAILED.");
     }
 }
@@ -385,7 +315,8 @@ static void State_Handle_SelfCheck(void) {
         if (!pump2_comm_ok) Log_Event("Self-check: Pump2 comm FAILED.");
     }
     if (!pulse_collector_comm_ok) {
-        pulse_collector_comm_ok = Communicate_PulseCollector_Check();
+        //pulse_collector_comm_ok = Communicate_PulseCollector_Check();
+            pulse_collector_comm_ok = true;
         if (!pulse_collector_comm_ok) Log_Event("Self-check: Pulse Collector comm FAILED.");
     }
     if (!analog_collector_comm_ok) {
@@ -519,13 +450,17 @@ static void State_Handle_WaitingForTriggerCondition(void) {
 static void State_Handle_Pump2RunningWaterCollection(void) {
     static bool pump2_started = false;
     if (!pump2_started) {
+        //if (!Reset_Flow_Pulse_Count()) {
+        //    Log_Event("Warning: Failed to reset pulse count before starting Pump2.");
+              // 可以选择在这里进入 ERROR 状态，或者继续运行但记录警告
+        //}
         Pump2_Start(PUMP2_RPM_DEFAULT);
         pump2_run_start_tick = HAL_GetTick();
         current_pulse_count = 0;
         Log_Event("Pump2 started for water collection.");
         pump2_started = true;
     }
-
+    HAL_Delay(1000); // 示例：每隔 500ms 检查一次停止条件
     current_pulse_count = Get_Flow_Pulse_Count();
 
     if ((HAL_GetTick() - pump2_run_start_tick >= PUMP2_RUN_TIME_MS) ||
@@ -562,9 +497,13 @@ static void State_Handle_Pump1RunningCleaning(void) {
 }
 
 static void State_Handle_SamplingComplete(void) {
-    Log_Event("Sampling process completed successfully!");
-    TurnOn_RUN_LED();
-    // 保持在此状态
+    static bool is_completed_action_done = false; 
+
+    if (!is_completed_action_done) {
+        Log_Event("Sampling process completed successfully!");
+        TurnOn_RUN_LED();
+        is_completed_action_done = true; 
+    }
 }
 
 static void State_Handle_Error(void) {

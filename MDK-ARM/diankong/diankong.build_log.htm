@@ -22,74 +22,23 @@ Dialog DLL:      TCM.DLL V1.34.0.0
  
 <h2>Project:</h2>
 D:\Auvcode\stm32\diankong\MDK-ARM\diankong.uvprojx
-Project File Date:  04/14/2026
+Project File Date:  04/20/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
-Rebuild target 'diankong'
-assembling startup_stm32f427xx.s...
-compiling stm32f4xx_hal_msp.c...
-compiling usart.c...
-compiling gpio.c...
-compiling stm32f4xx_it.c...
-compiling debug_commands.c...
-..\Core\Src\debug_commands.c(48): warning:  #223-D: function "Config_Save" declared implicitly
-                  Config_Save();
-..\Core\Src\debug_commands.c(49): warning:  #870-D: invalid multibyte character sequence
-                  printf("\r\n#作业模式设置�?: %s (%d)#\r\n", GetTriggerModeString(g_job_config.trigger_mode), g_job_config.trigger_mode);
-..\Core\Src\debug_commands.c(57): warning:  #223-D: function "Config_Save" declared implicitly
-              Config_Save();
-..\Core\Src\debug_commands.c(58): warning:  #870-D: invalid multibyte character sequence
-              printf("\r\n#延时时间设置�?: %lu ms#\r\n", g_job_config.params.delay_time_ms);
-..\Core\Src\debug_commands.c(63): warning:  #223-D: function "Config_Save" declared implicitly
-              Config_Save();
-..\Core\Src\debug_commands.c(68): warning:  #870-D: invalid multibyte character sequence
-              HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#读取运行过程参数 (待实�?)#\r\n", strlen("\r\n#读取运行过程参数 (待实�?)#\r\n"), 0xFF);
-..\Core\Src\debug_commands.c(68): warning:  #870-D: invalid multibyte character sequence
-              HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#读取运行过程参数 (待实�?)#\r\n", strlen("\r\n#读取运行过程参数 (待实�?)#\r\n"), 0xFF);
-..\Core\Src\debug_commands.c(73): warning:  #870-D: invalid multibyte character sequence
-              printf("\r\n--- 当前系统状�? ---\r\n");
-..\Core\Src\debug_commands.c(82): warning:  #870-D: invalid multibyte character sequence
-              printf("\r\n#状态查询完�?#\r\n");
-..\Core\Src\debug_commands.c(32): warning:  #177-D: variable "cmd_buffer"  was declared but never referenced
-          char cmd_buffer[RX_BUF_LEN]; // 用于存储提取的命令部�?
-..\Core\Src\debug_commands.c(91): warning:  #1-D: last line of file ends without a newline
-  }
-..\Core\Src\debug_commands.c: 11 warnings, 0 errors
-compiling config_manager.c...
-../Core/Inc/config_manager.h(11): warning:  #1-D: last line of file ends without a newline
-  #endif
-..\Core\Src\config_manager.c(66): warning:  #1-D: last line of file ends without a newline
-  }
-..\Core\Src\config_manager.c: 2 warnings, 0 errors
+Build target 'diankong'
 compiling main.c...
 ../Core/Src/main.c(108): warning:  #223-D: function "Config_Load" declared implicitly
     Config_Load();
-../Core/Src/main.c: 1 warning, 0 errors
-compiling modbus_rtu.c...
-compiling state_machine.c...
-..\Core\Src\state_machine.c(39): warning:  #177-D: variable "pump1_run_start_tick"  was declared but never referenced
-  static uint32_t pump1_run_start_tick = 0;
-..\Core\Src\state_machine.c: 1 warning, 0 errors
-compiling stm32f4xx_hal_rcc.c...
-compiling stm32f4xx_hal_flash.c...
-compiling stm32f4xx_hal_rcc_ex.c...
-compiling stm32f4xx_hal_uart.c...
-compiling stm32f4xx_hal_dma.c...
-compiling stm32f4xx_hal.c...
-compiling stm32f4xx_hal_pwr_ex.c...
-compiling stm32f4xx_hal_gpio.c...
-compiling system_stm32f4xx.c...
-compiling stm32f4xx_hal_pwr.c...
-compiling stm32f4xx_hal_flash_ramfunc.c...
-compiling stm32f4xx_hal_flash_ex.c...
-compiling stm32f4xx_hal_cortex.c...
-compiling stm32f4xx_hal_exti.c...
-compiling stm32f4xx_hal_dma_ex.c...
+../Core/Src/main.c(122): warning:  #223-D: function "HandleDebugMode_Independent" declared implicitly
+          HandleDebugMode_Independent(); // 调用独立的调试处理函�?
+../Core/Src/main.c(110): warning:  #177-D: variable "current_pulse_count"  was declared but never referenced
+    static uint32_t current_pulse_count = 0;
+../Core/Src/main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=29472 RO-data=1476 RW-data=88 ZI-data=25464  
+Program Size: Code=19932 RO-data=1004 RW-data=84 ZI-data=1572  
 FromELF: creating hex file...
-"diankong\diankong.axf" - 0 Error(s), 15 Warning(s).
+"diankong\diankong.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -112,7 +61,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

@@ -33,6 +33,7 @@ diankong\state_machine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart
 diankong\state_machine.o: ../Core/Inc/usart.h
 diankong\state_machine.o: ../Core/Inc/main.h
 diankong\state_machine.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+diankong\state_machine.o: ../Core/Inc/state_machine.h
 diankong\state_machine.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 diankong\state_machine.o: ../Core/Inc/modbus_rtu.h
 diankong\state_machine.o: ../Core/Inc/gpio.h

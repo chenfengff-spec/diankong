@@ -34,5 +34,7 @@ diankong\modbus_rtu.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 diankong\modbus_rtu.o: ../Core/Inc/usart.h
 diankong\modbus_rtu.o: ../Core/Inc/main.h
 diankong\modbus_rtu.o: ../Core/Inc/usart.h
+diankong\modbus_rtu.o: ../Core/Inc/state_machine.h
+diankong\modbus_rtu.o: ../Core/Inc/main.h
 diankong\modbus_rtu.o: ../Core/Inc/gpio.h
 diankong\modbus_rtu.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

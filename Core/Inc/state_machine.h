@@ -6,6 +6,15 @@
 #include <string.h>
 #include "modbus_rtu.h"
 
+#define PUMP2_RPM_DEFAULT   375 // 示例转速
+#define PUMP1_RPM_DEFAULT   50  // 示例转速
+
+#define REQUIRED_PULSE_FOR_10L  107150UL // 电子流量计流量系数：10715脉冲/升，取水10L脉冲数量107150
+#define PUMP2_RUN_TIME_MS       (10UL * 60UL * 1000UL) // 泵2运行10分钟
+#define PUMP1_RUN_TIME_MS       (2UL * 60UL * 1000UL)  // 泵1运行2分钟
+
+#define SYSTEM_SELF_CHECK_TIMEOUT_MS (5 * 1000UL) // 自检超时时间，例如5秒
+
 // ============================================================================
 // 状态定义
 // ============================================================================
@@ -71,18 +80,7 @@ void TurnOff_RUN_LED(void);
 void Toggle_RUN_LED(void);
 void Log_Event(const char* format, ...);
 
-// RS485 DE 引脚控制函数声明 (通常会放在各自的驱动文件或gpio文件中)
-// 为了简化，这里先放在一起
-void RS485_1_DE_Receive(void);
-void RS485_1_DE_Transmit(void);
-void RS485_2_DE_Receive(void);
-void RS485_2_DE_Transmit(void);
-void RS485_3_DE_Receive(void);
-void RS485_3_DE_Transmit(void);
-void RS485_4_DE_Receive(void);
-void RS485_4_DE_Transmit(void);
-void RS485_6_DE_Receive(void);
-void RS485_6_DE_Transmit(void);
+
 
 // 设备通信检查占位符
 bool Communicate_Pump1_Check(void);

@@ -32,4 +32,7 @@ diankong\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.
 diankong\stm32f4xx_it.o: ../Core/Inc/usart.h
 diankong\stm32f4xx_it.o: ../Core/Inc/main.h
 diankong\stm32f4xx_it.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+diankong\stm32f4xx_it.o: ../Core/Inc/state_machine.h
+diankong\stm32f4xx_it.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+diankong\stm32f4xx_it.o: ../Core/Inc/modbus_rtu.h
 diankong\stm32f4xx_it.o: ../Core/Inc/stm32f4xx_it.h

@@ -1,5 +1,7 @@
 #include "debug_commands.h"
 #include "usart.h" // 确保这里包含了 usart.h，以便访问 huart6
+#include "config_manager.h" // 包含配置管理器头文件以访问 g_job_config
+
 extern JobConfig_t g_job_config;
 
 // [新增]：用于将触发模式枚举转换为字符串的辅助函数实现
@@ -38,52 +40,62 @@ void HandleDebugMode_Independent(void) {
 
         // 解析并执行调试命令
         if (strncmp(command_str, "exit", 4) == 0) {
+            Config_Save(); // 保存当前配置到 Flash
             debugMode = 0; // 退出调试模式
-            HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#offdebugmode#\r\n", strlen("\r\n#offdebugmode#\r\n"), 0xFF);
+            RS485_Transmit(DEBUG_UART, (uint8_t*)"\r\n#offdebugmode#\r\n", strlen("\r\n#offdebugmode#\r\n"), RS485_PORT_5); // 发送数据
         }
         // 设置作业模式
         else if (sscanf(command_str, "set_mode %d", &value_int) == 1) {
+            char response[128];
             if (value_int >= TRIGGER_MODE_NONE && value_int <= TRIGGER_MODE_SERIAL_COMMAND) {
                 g_job_config.trigger_mode = (TriggerMode_t)value_int;
-                Config_Save();
-                printf("\r\n#作业模式设置为: %s (%d)#\r\n", GetTriggerModeString(g_job_config.trigger_mode), g_job_config.trigger_mode);
+                snprintf(response, sizeof(response), "\r\n#Job mode set to: %s (%d)#\r\n",
+                        GetTriggerModeString(g_job_config.trigger_mode), g_job_config.trigger_mode);
+                RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
             } else {
-                printf("\r\n#无效模式ID，请使用0-4#\r\n");
+                snprintf(response, sizeof(response), "\r\n#Invalid mode ID, please use 0-4#\r\n");
+                RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
             }
         }
-        // 设置延时触发时间
+        // Set delay trigger time
         else if (sscanf(command_str, "set_delay %d", &value_int) == 1) {
+            char response[128];
             g_job_config.params.delay_time_ms = (uint32_t)value_int;
-            Config_Save();
-            printf("\r\n#延时时间设置为: %lu ms#\r\n", g_job_config.params.delay_time_ms);
+            snprintf(response, sizeof(response), "\r\n#Delay time set to: %lu ms#\r\n", g_job_config.params.delay_time_ms);
+            RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
         }
-        // 设置深度触发值
+        // Set depth trigger value
         else if (sscanf(command_str, "set_depth %f", &value_float) == 1) {
+            char response[128];
             g_job_config.params.depth_value = value_float;
-            Config_Save();
-            printf("\r\n#深度触发值设置为: %.2f m#\r\n", g_job_config.params.depth_value);
+            snprintf(response, sizeof(response), "\r\n#Depth trigger value set to: %.2f m#\r\n", g_job_config.params.depth_value);
+            RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
         }
-        // 读取运行日志 (占位符)
+        // Read runtime log (placeholder)
         else if (strncmp(command_str, "read_log", 8) == 0) {
-            HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#读取运行过程参数 (待实现)#\r\n", strlen("\r\n#读取运行过程参数 (待实现)#\r\n"), 0xFF);
-            // 这里需要实现从 Flash 读取 g_sampling_log 并打印的逻辑
+            char response[] = "\r\n#Read runtime parameters (to be implemented)#\r\n";
+            RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
         }
-        // 查询当前配置和状态
-        else if (strncmp(command_str, "status", 6) == 0) {
-            printf("\r\n--- 当前系统状态 ---\r\n");
-            printf("当前模式: %s (%d)\r\n", GetTriggerModeString(g_job_config.trigger_mode), g_job_config.trigger_mode);
+        // Query current configuration and status
+         else if (strncmp(command_str, "status", 6) == 0) {
+            RS485_5_DE_Transmit(); // 切换到发送模式
+            printf("yes");
+            HAL_Delay(1000);
+            printf("\r\n--- Current System Status ---\r\n");
+            printf("Current mode: %s (%d)\r\n", GetTriggerModeString(g_job_config.trigger_mode), g_job_config.trigger_mode);
             if (g_job_config.trigger_mode == TRIGGER_MODE_DELAY || g_job_config.trigger_mode == TRIGGER_MODE_DEPTH_OR_DELAY) {
-                printf("延时设置: %lu ms\r\n", g_job_config.params.delay_time_ms);
+                printf("Delay setting: %lu ms\r\n", g_job_config.params.delay_time_ms);
             }
             if (g_job_config.trigger_mode == TRIGGER_MODE_DEPTH || g_job_config.trigger_mode == TRIGGER_MODE_DEPTH_OR_DELAY) {
-                printf("深度设置: %.2f m\r\n", g_job_config.params.depth_value);
+                printf("Depth setting: %.2f m\r\n", g_job_config.params.depth_value);
             }
             printf("-------------------\r\n");
-            printf("\r\n#状态查询完成#\r\n");
+            printf("\r\n#Status query completed#\r\n");
+            RS485_5_DE_Receive(); // 切换回接收模式
         }
-
         else {
-            HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#NAN#\r\n", strlen("\r\n#NAN#\r\n"), 0xFF);
+            char response[] = "\r\n#NAN#\r\n";
+            RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
         }
         memset(rx1S.rx_buf, 0x00, RX_BUF_LEN);
         rx1S.data_length = 0;

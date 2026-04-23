@@ -102,6 +102,8 @@ bool ModbusRTU_PumpStart(UART_HandleTypeDef *huart,
                          uint8_t slave_address,
                          uint8_t dir, uint8_t acc, uint16_t speed, uint32_t runTime_10ms);
 
+bool Reset_Flow_Pulse_Count(void);
+
 /**
   * @brief  停止蠕动泵的 Modbus RTU 控制函数。
   * @param  huart: UART 句柄。

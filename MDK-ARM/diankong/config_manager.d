@@ -33,6 +33,9 @@ diankong\config_manager.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uar
 diankong\config_manager.o: ../Core/Inc/usart.h
 diankong\config_manager.o: ../Core/Inc/main.h
 diankong\config_manager.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+diankong\config_manager.o: ../Core/Inc/state_machine.h
+diankong\config_manager.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+diankong\config_manager.o: ../Core/Inc/modbus_rtu.h
 diankong\config_manager.o: ../Core/Inc/debug_commands.h
 diankong\config_manager.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 diankong\config_manager.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

@@ -50,7 +50,7 @@ void MX_UART4_Init(void)
 
   /* USER CODE END UART4_Init 1 */
   huart4.Instance = UART4;
-  huart4.Init.BaudRate = 115200;
+  huart4.Init.BaudRate = 9600;
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
@@ -107,7 +107,7 @@ void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -518,7 +518,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 int fputc(int ch, FILE *f)
 {
-    HAL_UART_Transmit(&huart6, (uint8_t *)&ch, 1, 0xffff);
+    HAL_UART_Transmit(&huart5, (uint8_t *)&ch, 1, 0xffff);
     return ch;
 }
  
@@ -530,13 +530,13 @@ int fputc(int ch, FILE *f)
 int fgetc(FILE *f)
 {
     uint8_t ch = 0;
-    HAL_UART_Receive(&huart6, &ch, 1, 0xffff);
+    HAL_UART_Receive(&huart5, &ch, 1, 0xffff);
     return ch;
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (huart->Instance == USART5)
+    if (huart->Instance == UART5)
     {
         // 1. 将接收到的字节添加到缓冲区
         // 检查缓冲区是否已满
@@ -547,15 +547,19 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             // 如果需要，可以在这里发送一个串口警告
             // HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"Buffer Overflow! Cleared.\r\n", strlen("Buffer Overflow! Cleared.\r\n"), 0xFF);
         } else {
-          rx1S.rx_buf[rx1S.data_length++] = aRx1Buffer;
+            rx1S.rx_buf[rx1S.data_length++] = aRx1Buffer;
             // 3. 检查是否是 "debug" 命令
             if (debugMode == 0 && rx1S.data_length == 7 && rx1S.rx_buf[5] == 0x0D && rx1S.rx_buf[6] == 0x0A &&
             memcmp(rx1S.rx_buf, "debug", 5) == 0) {
                 debugMode = 1; // 激活调试模式
                 memset(rx1S.rx_buf, 0x00, RX_BUF_LEN);
                 rx1S.data_length = 0;
-                HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#debugmode#\r\n", strlen("\r\n#debugmode#\r\n"), 0xFF);
+                RS485_5_DE_Transmit(); // 切换到发送模式
+                HAL_UART_Transmit(huart, (uint8_t*)"\r\n#debugmode#\r\n", strlen("\r\n#debugmode#\r\n"), 0xFF); // 发送数据
+                HAL_UART_Transmit(huart, (uint8_t*)"\r\n#debugmode#\r\n", strlen("\r\n#debugmode#\r\n"), 0xFF); // 发送数据
+                RS485_5_DE_Receive(); // 切换回接收模式，准备接收下一个命令
                 // 不清空缓冲区，交由主循环的 HandleDebugMode_Independent() 处理和清空
+
               }
             
         }
@@ -563,6 +567,96 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         HAL_UART_Receive_IT(DEBUG_UART, &aRx1Buffer, 1);
     }
 }
-    
-             
+// RS485 DE 引脚控制实现 (假定宏已在 gpio.h 或 main.h 中定义)
+/**
+  * @brief  Sets RS485_1 DE pin to receive mode. (Analog Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_1_DE_Receive(void) { HAL_GPIO_WritePin(USART1_DE_GPIO_Port, USART1_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_1 DE pin to transmit mode. (Analog Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_1_DE_Transmit(void) { HAL_GPIO_WritePin(USART1_DE_GPIO_Port, USART1_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_2 DE pin to receive mode. (Pump 1)
+  * @param  None
+  * @retval None
+  */
+void RS485_2_DE_Receive(void) { HAL_GPIO_WritePin(USART2_DE_GPIO_Port, USART2_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_2 DE pin to transmit mode. (Pump 1)
+  * @param  None
+  * @retval None
+  */
+void RS485_2_DE_Transmit(void) { HAL_GPIO_WritePin(USART2_DE_GPIO_Port, USART2_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_3 DE pin to receive mode. (Pump 2)
+  * @param  None
+  * @retval None
+  */
+void RS485_3_DE_Receive(void) { HAL_GPIO_WritePin(USART3_DE_GPIO_Port, USART3_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_3 DE pin to transmit mode. (Pump 2)
+  * @param  None
+  * @retval None
+  */
+void RS485_3_DE_Transmit(void) { HAL_GPIO_WritePin(USART3_DE_GPIO_Port, USART3_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_4 DE pin to receive mode. (Pulse Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_4_DE_Receive(void) { HAL_GPIO_WritePin(USART4_DE_GPIO_Port, USART4_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_4 DE pin to transmit mode. (Pulse Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_4_DE_Transmit(void) { HAL_GPIO_WritePin(USART4_DE_GPIO_Port, USART4_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_4 DE pin to receive mode. (Pulse Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_5_DE_Receive(void) { HAL_GPIO_WritePin(USART5_DE_GPIO_Port, USART5_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_4 DE pin to transmit mode. (Pulse Collector)
+  * @param  None
+  * @retval None
+  */
+void RS485_5_DE_Transmit(void) { HAL_GPIO_WritePin(USART5_DE_GPIO_Port, USART5_DE_Pin, GPIO_PIN_SET); }
+/**
+  * @brief  Sets RS485_6 DE pin to receive mode. (Upper Computer)
+  * @param  None
+  * @retval None
+  */
+void RS485_6_DE_Receive(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_DE_Pin, GPIO_PIN_RESET); }
+/**
+  * @brief  Sets RS485_6 DE pin to transmit mode. (Upper Computer)
+  * @param  None
+  * @retval None
+  */
+void RS485_6_DE_Transmit(void) { HAL_GPIO_WritePin(USART6_DE_GPIO_Port, USART6_DE_Pin, GPIO_PIN_SET); }
+
+void RS485_Transmit(UART_HandleTypeDef* huart, uint8_t* data, uint16_t size, RS485_Port_t port) {
+    // 参数校验
+    if (port >= RS485_PORT_MAX) return;
+
+    // 切换到发送模式
+    transmit_func[port]();
+
+    HAL_UART_Transmit(huart, data, size, 0xff);
+    HAL_Delay(100);
+    HAL_UART_Transmit(huart, data, size, 0xff);
+    HAL_Delay(100);
+    HAL_UART_Transmit(huart, data, size, 0xff);
+
+    // 切换回接收模式
+    receive_func[port]();
+
+    HAL_Delay(100);
+}
 /* USER CODE END 1 */
