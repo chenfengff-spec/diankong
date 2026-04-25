@@ -93,6 +93,41 @@ void HandleDebugMode_Independent(void) {
             printf("\r\n#Status query completed#\r\n");
             RS485_5_DE_Receive(); // 切换回接收模式
         }
+        else if (strncmp(command_str, "read_log", 8) == 0) {
+            HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#开始读取设备内部日志#\r\n", strlen("\r\n#开始读取设备内部日志#\r\n"), 0xFF);
+            
+            extern bool Log_Load(void); // 确保在 config_manager.h 中声明，或者在这里 extern 声明
+
+            if (Log_Load()) {
+                printf("\r\n================ 历史运行参数报告 ================\r\n");
+                
+                // 1. 打印自检结果
+                printf("1. 系统自检结果: %s\r\n", g_sampling_log.system_self_check_overall_ok ? "PASSED" : "FAILED");
+                printf("   - 蠕动泵1通信: %s\r\n", g_sampling_log.pump1_comm_ok_log ? "OK" : "FAIL");
+                printf("   - 蠕动泵2通信: %s\r\n", g_sampling_log.pump2_comm_ok_log ? "OK" : "FAIL");
+                printf("   - 脉冲采集器通信: %s\r\n", g_sampling_log.pulse_collector_comm_ok_log ? "OK" : "FAIL");
+                printf("   - 模拟量采集器通信: %s\r\n", g_sampling_log.analog_collector_comm_ok_log ? "OK" : "FAIL");
+                
+                // 2. 打印触发信息
+                printf("2. 触发参数:\r\n");
+                printf("   - 触发模式: %s (%d)\r\n", GetTriggerModeString(g_sampling_log.trigger_mode_at_start), g_sampling_log.trigger_mode_at_start);
+                printf("   - 达到触发条件时间(系统启动后): %lu ms\r\n", g_sampling_log.sampling_start_time);
+                
+                // 3. 打印蠕动泵2 (取样) 运行信息
+                printf("3. 海水过滤取样阶段 (蠕动泵2):\r\n");
+                printf("   - 启动时刻: %lu ms\r\n", g_sampling_log.pump2_start_time);
+                printf("   - 停止时刻: %lu ms\r\n", g_sampling_log.pump2_stop_time);
+                printf("   - 最终累计脉冲数: %lu\r\n", g_sampling_log.pump2_final_pulse_count);
+
+                // 4. 打印蠕动泵1 (清洗) 运行信息
+                printf("4. 设备清洗阶段 (蠕动泵1):\r\n");
+                printf("   - 启动时刻: %lu ms\r\n", g_sampling_log.pump1_start_time);
+                printf("   - 停止时刻: %lu ms\r\n", g_sampling_log.pump1_stop_time);
+                printf("====================================================\r\n");
+            } else {
+                printf("\r\n!!! 读取失败：Flash 中未找到有效日志数据或数据已损坏 !!!\r\n");
+            }
+        }
         else {
             char response[] = "\r\n#NAN#\r\n";
             RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);

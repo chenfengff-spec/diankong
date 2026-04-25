@@ -36,3 +36,7 @@ diankong\main.o: ../Core/Inc/state_machine.h
 diankong\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 diankong\main.o: ../Core/Inc/modbus_rtu.h
 diankong\main.o: ../Core/Inc/gpio.h
+diankong\main.o: ../Core/Inc/config_manager.h
+diankong\main.o: ../Core/Inc/debug_commands.h
+diankong\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+diankong\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

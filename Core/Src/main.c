@@ -26,6 +26,8 @@
 // [修改开始]：新增状态机头文件和字符串处理头文件
 #include "state_machine.h" // 引入状态机模块的头文件
 #include <string.h>        // 用于内存操作函数，如memset
+#include "config_manager.h"
+#include "debug_commands.h" // 包含调试命令处理函数的声明
 // [修改结束]
 /* USER CODE END Includes */
 
@@ -107,7 +109,6 @@ int main(void)
   extern uint8_t aRx1Buffer;
   Config_Load();
   HAL_UART_Receive_IT(DEBUG_UART, &aRx1Buffer, 1);
-  static uint32_t current_pulse_count = 0;
   // [修改结束]
   /* USER CODE END 2 */
 

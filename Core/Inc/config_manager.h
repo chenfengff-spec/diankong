@@ -7,5 +7,6 @@
 // 函数声明
 void Config_Load(void);
 void Config_Save(void);
-
+void Log_Save(void);
+bool Log_Load(void);
 #endif

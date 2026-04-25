@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-
+#include "config_manager.h" // 需要访问 Log_Save 和 Log_Load 函数
 // ============================================================================
 // 宏定义
 // ============================================================================
@@ -27,8 +27,6 @@ static bool pump2_comm_ok = false;
 static bool pulse_collector_comm_ok = false;
 static bool analog_collector_comm_ok = false;
 
-static uint32_t pump2_run_start_tick = 0;
-static uint32_t pump1_run_start_tick = 0;
 static uint32_t current_pulse_count = 0; // 从脉冲采集器获取的实时脉冲数
 
 
@@ -143,7 +141,7 @@ void Pump1_Start(uint16_t rpm) {
     extern UART_HandleTypeDef huart2;
     // 蠕动泵1，地址 0x01。方向 0，加速度 10，速度 rpm，运行时间 2 分钟
     uint32_t runTime_10ms = PUMP1_RUN_TIME_MS / 10; // 2分钟转换为 10ms 单位
-    if (!ModbusRTU_PumpStart(&huart2, RS485_2_DE_Transmit, RS485_2_DE_Receive, 0x01, 0, 10, rpm, runTime_10ms)) {
+    if (!ModbusRTU_PumpStart(&huart2, RS485_2_DE_Transmit, RS485_2_DE_Receive, 0x01, 1, 10, rpm, runTime_10ms)) {
         Log_Event("Pump1 Start FAILED.");
     }
 }
@@ -455,7 +453,7 @@ static void State_Handle_Pump2RunningWaterCollection(void) {
               // 可以选择在这里进入 ERROR 状态，或者继续运行但记录警告
         //}
         Pump2_Start(PUMP2_RPM_DEFAULT);
-        pump2_run_start_tick = HAL_GetTick();
+        g_sampling_log.pump2_start_time = HAL_GetTick();
         current_pulse_count = 0;
         Log_Event("Pump2 started for water collection.");
         pump2_started = true;
@@ -463,9 +461,10 @@ static void State_Handle_Pump2RunningWaterCollection(void) {
     HAL_Delay(1000); // 示例：每隔 500ms 检查一次停止条件
     current_pulse_count = Get_Flow_Pulse_Count();
 
-    if ((HAL_GetTick() - pump2_run_start_tick >= PUMP2_RUN_TIME_MS) ||
+    if ((HAL_GetTick() - g_sampling_log.pump2_start_time >= PUMP2_RUN_TIME_MS) ||
         (current_pulse_count >= REQUIRED_PULSE_FOR_10L)) {
         Log_Event("Pump2 stop condition met.");
+        g_sampling_log.pump2_final_pulse_count = current_pulse_count;
         currentSystemState = STATE_PUMP2_STOPPED_COLLECTION_COMPLETE;
         pump2_started = false;
     }
@@ -498,7 +497,12 @@ static void State_Handle_Pump1RunningCleaning(void) {
 
 static void State_Handle_SamplingComplete(void) {
     static bool is_completed_action_done = false; 
-
+    static bool is_log_saved = false;
+    if (!is_log_saved) {
+        Log_Save(); 
+        Log_Event("Log saved to flash.");
+        is_log_saved = true;
+    }
     if (!is_completed_action_done) {
         Log_Event("Sampling process completed successfully!");
         TurnOn_RUN_LED();
@@ -528,6 +532,7 @@ void StateMachine_Init(void) {
     RS485_2_DE_Receive();
     RS485_3_DE_Receive();
     RS485_4_DE_Receive();
+    RS485_5_DE_Receive();
     RS485_6_DE_Receive();
     Log_Event("StateMachine initialized.");
 }

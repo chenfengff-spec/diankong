@@ -7,7 +7,7 @@
 #include "modbus_rtu.h"
 
 #define PUMP2_RPM_DEFAULT   375 // 示例转速
-#define PUMP1_RPM_DEFAULT   50  // 示例转速
+#define PUMP1_RPM_DEFAULT   375  // 示例转速
 
 #define REQUIRED_PULSE_FOR_10L  107150UL // 电子流量计流量系数：10715脉冲/升，取水10L脉冲数量107150
 #define PUMP2_RUN_TIME_MS       (10UL * 60UL * 1000UL) // 泵2运行10分钟
@@ -33,9 +33,13 @@ typedef enum {
 
 // 记录数据结构体
 typedef struct {
+    uint32_t magic_word;
+
     uint32_t sampling_start_time;
-    TriggerMode_t trigger_mode_at_start;
+    TriggerMode_t trigger_mode_at_start; 
+    uint32_t pump2_start_time;
     uint32_t pump2_stop_time;
+    uint32_t pump2_final_pulse_count;
     uint32_t pump1_start_time;
     uint32_t pump1_stop_time;
     // 其他需要记录的数据
