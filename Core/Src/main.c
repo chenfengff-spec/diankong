@@ -130,12 +130,12 @@ int main(void)
         continue; // 跳过状态机的正常执行
     }
     
-    //HAL_Delay(1000); // 示例：每隔 500ms 检查一次停止条件
+
     //current_pulse_count = Get_Flow_Pulse_Count();
-    // [修改开始]：在主循环中周期性地调用状态机运行函数
-    StateMachine_Run(); // 执行状态机逻辑，根据当前状态进行处理和状态转换
-    // 可以在这里添加一些低优先级、非实时的后台任务，或者睡眠/低功耗模式
-    // [修改结束]
+    if (g_job_config.state_machine_enable)
+    {
+        StateMachine_Run();
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

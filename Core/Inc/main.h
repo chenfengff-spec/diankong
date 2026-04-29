@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -56,6 +56,7 @@ typedef struct {
 typedef struct {
     uint32_t magic_word;
     TriggerMode_t trigger_mode;
+    bool state_machine_enable;
     canshu params;
 } JobConfig_t;
 

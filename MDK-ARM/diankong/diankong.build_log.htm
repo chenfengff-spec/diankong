@@ -27,11 +27,32 @@ Project File Date:  04/20/2026
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'diankong'
-compiling state_machine.c...
+compiling debug_commands.c...
+..\Core\Src\debug_commands.c(92): warning:  #870-D: invalid multibyte character sequence
+              HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#开始读取设备内部日�?#\r\n", strlen("\r\n#开始读取设备内部日�?#\r\n"), 0xFF);
+..\Core\Src\debug_commands.c(92): warning:  #870-D: invalid multibyte character sequence
+              HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#开始读取设备内部日�?#\r\n", strlen("\r\n#开始读取设备内部日�?#\r\n"), 0xFF);
+..\Core\Src\debug_commands.c(101): warning:  #870-D: invalid multibyte character sequence
+                  printf("   - 蠕动�?1通信: %s\r\n", g_sampling_log.pump1_comm_ok_log ? "OK" : "FAIL");
+..\Core\Src\debug_commands.c(102): warning:  #870-D: invalid multibyte character sequence
+                  printf("   - 蠕动�?2通信: %s\r\n", g_sampling_log.pump2_comm_ok_log ? "OK" : "FAIL");
+..\Core\Src\debug_commands.c(109): warning:  #870-D: invalid multibyte character sequence
+                  printf("   - 达到触发条件时间(系统启动�?): %lu ms\r\n", g_sampling_log.sampling_start_time);
+..\Core\Src\debug_commands.c(112): warning:  #870-D: invalid multibyte character sequence
+                  printf("3. 海水过滤取样阶段 (蠕动�?2):\r\n");
+..\Core\Src\debug_commands.c(118): warning:  #870-D: invalid multibyte character sequence
+                  printf("4. 设备清洗阶段 (蠕动�?1):\r\n");
+..\Core\Src\debug_commands.c(148): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+              RS485_Transmit(DEBUG_UART, reply, strlen(reply), RS485_PORT_5);
+..\Core\Src\debug_commands.c(168): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+              RS485_Transmit(DEBUG_UART, reply, strlen(reply), RS485_PORT_5);
+..\Core\Src\debug_commands.c(34): warning:  #177-D: variable "cmd_buffer"  was declared but never referenced
+          char cmd_buffer[RX_BUF_LEN]; // 用于存储提取的命令部�?
+..\Core\Src\debug_commands.c: 10 warnings, 0 errors
 linking...
-Program Size: Code=21012 RO-data=1088 RW-data=80 ZI-data=1584  
+Program Size: Code=17788 RO-data=748 RW-data=56 ZI-data=1584  
 FromELF: creating hex file...
-"diankong\diankong.axf" - 0 Error(s), 0 Warning(s).
+"diankong\diankong.axf" - 0 Error(s), 10 Warning(s).
 
 <h2>Software Packages used:</h2>
 

@@ -71,11 +71,6 @@ void HandleDebugMode_Independent(void) {
             snprintf(response, sizeof(response), "\r\n#Depth trigger value set to: %.2f m#\r\n", g_job_config.params.depth_value);
             RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
         }
-        // Read runtime log (placeholder)
-        else if (strncmp(command_str, "read_log", 8) == 0) {
-            char response[] = "\r\n#Read runtime parameters (to be implemented)#\r\n";
-            RS485_Transmit(DEBUG_UART, (uint8_t*)response, strlen(response), RS485_PORT_5);
-        }
         // Query current configuration and status
          else if (strncmp(command_str, "status", 6) == 0) {
             RS485_5_DE_Transmit(); // 切换到发送模式
@@ -126,6 +121,69 @@ void HandleDebugMode_Independent(void) {
                 printf("====================================================\r\n");
             } else {
                 printf("\r\n!!! 读取失败：Flash 中未找到有效日志数据或数据已损坏 !!!\r\n");
+            }
+        }
+        else if (strncmp(command_str, "pump2_run", 9) == 0) {
+            // 1. 设置默认值
+            int speed = 375; // 默认转速 375
+            int dir = 1;     // 默认方向 1 (CW)
+            
+            // 2. 尝试从命令中提取参数
+            // 如果输入 "pump2_run"，提取到 0 个，保持默认 (375, 1)
+            // 如果输入 "pump2_run 600"，提取到 1 个，变为 (600, 1)
+            // 如果输入 "pump2_run 600 0"，提取到 2 个，变为 (600, 0)
+            sscanf(command_str, "pump2_run %d %d", &speed, &dir);
+            
+            // 3. 安全校验 (防止输入超出范围的数值)
+            if (speed < 0) speed = 0;
+            if (speed > 3000) speed = 3000;
+            if (dir != 0 && dir != 1) dir = 1; // 强制方向只能是 0 或 1
+
+            // 4. 执行控制
+            ModbusRTU_PumpStart(&huart3, RS485_3_DE_Transmit, RS485_3_DE_Receive, 0x01, dir, 10, speed, 360000);
+            
+            // 5. 动态反馈信息
+            char reply[64];
+            snprintf(reply, sizeof(reply), "\r\n#Pump2 START (Speed:%d, Dir:%d)#\r\n", speed, dir);
+            RS485_Transmit(DEBUG_UART, reply, strlen(reply), RS485_PORT_5);
+        }
+        else if (strncmp(command_str, "pump2STOP", 9) == 0) {
+            ModbusRTU_PumpStop(&huart3, RS485_3_DE_Transmit, RS485_3_DE_Receive, 0x01, 0);
+            RS485_Transmit(DEBUG_UART, "\r\n#Pump2STOP START#\r\n", strlen("\r\n#Pump2STOP START#\r\n"), RS485_PORT_5);
+        }
+        else if (strncmp(command_str, "pump1_run", 9) == 0) {
+            int speed = 375; // 默认转速 375
+            int dir = 1;     // 默认方向 1 (CW)
+            
+            sscanf(command_str, "pump1_run %d %d", &speed, &dir);
+            
+            if (speed < 0) speed = 0;
+            if (speed > 3000) speed = 3000;
+            if (dir != 0 && dir != 1) dir = 1;
+
+            ModbusRTU_PumpStart(&huart2, RS485_2_DE_Transmit, RS485_2_DE_Receive, 0x01, dir, 10, speed, 360000);
+            
+            char reply[64];
+            snprintf(reply, sizeof(reply), "\r\n#Pump1 START (Speed:%d, Dir:%d)#\r\n", speed, dir);
+            RS485_Transmit(DEBUG_UART, reply, strlen(reply), RS485_PORT_5);
+        }
+        else if (strncmp(command_str, "pump1STOP", 9) == 0) {
+            ModbusRTU_PumpStop(&huart2, RS485_2_DE_Transmit, RS485_2_DE_Receive, 0x01, 0);
+            RS485_Transmit(DEBUG_UART, "\r\n#Pump1STOP START#\r\n", strlen("\r\n#Pump1STOP START#\r\n"), RS485_PORT_5);
+        }
+        else if (strncmp(command_str, "set_sm_enable", 13) == 0) {
+            int enable_val = 1; // 默认值
+            
+            if (sscanf(command_str, "set_sm_enable %d", &enable_val) == 1) {
+                if (enable_val == 0) {
+                    g_job_config.state_machine_enable = false; 
+                    HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#状态机已暂停 (Paused)#\r\n", strlen("\r\n#状态机已暂停 (Paused)#\r\n"), 0xFF);
+                } else if (enable_val == 1) {
+                    g_job_config.state_machine_enable = true;  
+                    HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#状态机已恢复运行 (Running)#\r\n", strlen("\r\n#状态机已恢复运行 (Running)#\r\n"), 0xFF);
+                } else {
+                    HAL_UART_Transmit(DEBUG_UART, (uint8_t*)"\r\n#参数错误，请使用 0(暂停) 或 1(恢复)#\r\n", strlen("\r\n#参数错误，请使用 0(暂停) 或 1(恢复)#\r\n"), 0xFF);
+                }
             }
         }
         else {

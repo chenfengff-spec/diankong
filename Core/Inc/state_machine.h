@@ -11,7 +11,7 @@
 
 #define REQUIRED_PULSE_FOR_10L  107150UL // 电子流量计流量系数：10715脉冲/升，取水10L脉冲数量107150
 #define PUMP2_RUN_TIME_MS       (10UL * 60UL * 1000UL) // 泵2运行10分钟
-#define PUMP1_RUN_TIME_MS       (2UL * 60UL * 1000UL)  // 泵1运行2分钟
+#define PUMP1_RUN_TIME_MS       (2*60UL * 1000UL)  // 泵1运行2分钟
 
 #define SYSTEM_SELF_CHECK_TIMEOUT_MS (5 * 1000UL) // 自检超时时间，例如5秒
 

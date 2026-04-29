@@ -58,6 +58,7 @@ void Config_Load(void) {
         // 默认初始化
         g_job_config.magic_word = 0xABCD1234;
         g_job_config.trigger_mode = TRIGGER_MODE_NONE;
+        g_job_config.state_machine_enable = true;
         g_job_config.params.delay_time_ms = 500;
         g_job_config.params.depth_value = 1.0f;
         
